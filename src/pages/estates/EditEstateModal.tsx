@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Modal from '../../components/Modal';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import { Estate } from './EstatesPage';
+import type { Estate } from './EstatesPage';
 
 interface EditEstateModalProps {
   isOpen: boolean;

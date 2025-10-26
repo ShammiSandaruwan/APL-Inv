@@ -8,7 +8,7 @@ import AddBuildingModal from './AddBuildingModal';
 import EditBuildingModal from './EditBuildingModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
-import { Estate } from '../estates/EstatesPage';
+import type { Estate } from '../estates/EstatesPage';
 
 // Define the type for a building object
 export interface Building {

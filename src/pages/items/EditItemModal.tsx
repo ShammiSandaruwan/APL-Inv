@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import Modal from '../../components/Modal';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import { Item } from './ItemsPage';
-import { Estate } from '../estates/EstatesPage';
-import { Building } from '../buildings/BuildingsPage';
+import type { Item } from './ItemsPage';
+import type { Estate } from '../estates/EstatesPage';
+import type { Building } from '../buildings/BuildingsPage';
 import { supabase } from '../../lib/supabaseClient';
 import { showErrorToast } from '../../utils/toast';
 

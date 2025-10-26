@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import Modal from '../../components/Modal';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import { Building } from './BuildingsPage';
-import { Estate } from '../estates/EstatesPage';
+import type { Building } from './BuildingsPage';
+import type { Estate } from '../estates/EstatesPage';
 import { supabase } from '../../lib/supabaseClient';
 import { showErrorToast } from '../../utils/toast';
 

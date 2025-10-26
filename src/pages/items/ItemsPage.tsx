@@ -8,8 +8,6 @@ import AddItemModal from './AddItemModal';
 import EditItemModal from './EditItemModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
-import { Building } from '../buildings/BuildingsPage';
-import { Estate } from '../estates/EstatesPage';
 
 // Define the type for an item object
 export interface Item {
