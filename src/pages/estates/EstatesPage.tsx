@@ -7,6 +7,7 @@ import Card from '../../components/Card';
 import AddEstateModal from './AddEstateModal';
 import EditEstateModal from './EditEstateModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import EmptyState from '../../components/EmptyState';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
 
@@ -113,7 +114,12 @@ const EstatesPage: React.FC = () => {
       </div>
 
       {estates.length === 0 ? (
-        <p>No estates found. Add one to get started.</p>
+        <EmptyState
+          title="No Estates Found"
+          message="Get started by adding your first estate to the system."
+          actionText="Add Your First Estate"
+          onActionClick={() => setIsAddModalOpen(true)}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {estates.map((estate) => (

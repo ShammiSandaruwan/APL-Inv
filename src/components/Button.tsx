@@ -18,13 +18,13 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   // Base styles for the button
-  const baseStyles = 'rounded-md font-semibold transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2';
+  const baseStyles = 'rounded-md font-semibold focus:outline-none transition-all duration-200';
 
   // Variant-specific styles using the provided color palette
   const variantStyles = {
-    primary: 'bg-salem text-white hover:bg-goblin focus:ring-salem',
-    secondary: 'bg-gin text-mine-shaft hover:bg-gum-leaf focus:ring-bay-leaf',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
+    primary: 'bg-salem text-white hover:bg-goblin focus:ring-2 focus:ring-salem focus:ring-offset-2 active:scale-95',
+    secondary: 'bg-gin text-mine-shaft hover:bg-gum-leaf focus:ring-2 focus:ring-bay-leaf focus:ring-offset-2 active:scale-95',
+    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 active:scale-95',
   };
 
   // Size-specific styles

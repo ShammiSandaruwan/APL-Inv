@@ -11,8 +11,8 @@ const DashboardLayout: React.FC = () => {
     await supabase.auth.signOut();
   };
 
-  const linkStyles = "flex items-center px-4 py-2 text-gray-700 rounded-lg hover:bg-gin";
-  const activeLinkStyles = "bg-salem text-white";
+  const linkStyles = "flex items-center px-4 py-2 text-scorpion rounded-md hover:bg-gin transition-colors duration-200 border-l-4 border-transparent";
+  const activeLinkStyles = "bg-gin text-salem font-bold border-salem";
 
   return (
     <div className="flex h-screen bg-gin">

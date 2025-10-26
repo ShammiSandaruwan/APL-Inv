@@ -7,6 +7,7 @@ import Card from '../../components/Card';
 import AddBuildingModal from './AddBuildingModal';
 import EditBuildingModal from './EditBuildingModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import EmptyState from '../../components/EmptyState';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import type { Estate } from '../estates/EstatesPage';
 import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
@@ -125,7 +126,12 @@ const BuildingsPage: React.FC = () => {
       </div>
 
       {buildings.length === 0 ? (
-        <p>No buildings found. Add one to get started.</p>
+        <EmptyState
+          title="No Buildings Found"
+          message="Get started by adding your first building to the system."
+          actionText="Add Your First Building"
+          onActionClick={() => setIsAddModalOpen(true)}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {buildings.map((building) => (

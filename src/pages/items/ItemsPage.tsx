@@ -7,6 +7,7 @@ import Card from '../../components/Card';
 import AddItemModal from './AddItemModal';
 import EditItemModal from './EditItemModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import EmptyState from '../../components/EmptyState';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
 
@@ -129,7 +130,12 @@ const ItemsPage: React.FC = () => {
       </div>
 
       {items.length === 0 ? (
-        <p>No items found. Add one to get started.</p>
+        <EmptyState
+          title="No Items Found"
+          message="Get started by adding your first item to the system."
+          actionText="Add Your First Item"
+          onActionClick={() => setIsAddModalOpen(true)}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map((item) => (
