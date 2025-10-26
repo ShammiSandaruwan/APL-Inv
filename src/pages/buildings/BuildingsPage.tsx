@@ -9,6 +9,7 @@ import EditBuildingModal from './EditBuildingModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import type { Estate } from '../estates/EstatesPage';
+import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
 
 // Define the type for a building object
 export interface Building {
@@ -117,7 +118,10 @@ const BuildingsPage: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-mine-shaft">Buildings Management</h1>
-        <Button onClick={() => setIsAddModalOpen(true)}>Add Building</Button>
+        <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
+          <FaPlus className="mr-2" />
+          Add Building
+        </Button>
       </div>
 
       {buildings.length === 0 ? (
@@ -138,7 +142,9 @@ const BuildingsPage: React.FC = () => {
                     setSelectedBuilding(building);
                     setIsEditModalOpen(true);
                   }}
+                  className="flex items-center"
                 >
+                  <FaPencilAlt className="mr-2" />
                   Edit
                 </Button>
                 <Button
@@ -148,7 +154,9 @@ const BuildingsPage: React.FC = () => {
                     setSelectedBuilding(building);
                     setIsDeleteModalOpen(true);
                   }}
+                  className="flex items-center"
                 >
+                  <FaTrash className="mr-2" />
                   Delete
                 </Button>
               </div>

@@ -4,6 +4,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import Button from '../components/Button';
 import logo from '../assets/logo.png';
+import { FaTachometerAlt, FaBuilding, FaBoxOpen, FaSignOutAlt } from 'react-icons/fa';
 
 const DashboardLayout: React.FC = () => {
   const handleLogout = async () => {
@@ -15,26 +16,31 @@ const DashboardLayout: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-gin">
-      <aside className="w-64 flex-shrink-0 bg-white shadow-md">
+      <aside className="w-64 flex-shrink-0 bg-white shadow-md flex flex-col">
         <div className="p-4">
           <img src={logo} alt="Company Logo" className="w-24 mx-auto" />
         </div>
-        <nav className="p-2">
+        <nav className="p-2 flex-1">
           <NavLink to="/" end className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}>
+            <FaTachometerAlt className="mr-3" />
             Dashboard
           </NavLink>
           <NavLink to="/estates" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}>
+            <FaBuilding className="mr-3" />
             Estates
           </NavLink>
           <NavLink to="/buildings" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}>
+            <FaBuilding className="mr-3" />
             Buildings
           </NavLink>
           <NavLink to="/items" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}>
+            <FaBoxOpen className="mr-3" />
             Items
           </NavLink>
         </nav>
-        <div className="p-4 absolute bottom-0 w-64">
-          <Button onClick={handleLogout} variant="secondary" className="w-full">
+        <div className="p-4">
+          <Button onClick={handleLogout} variant="secondary" className="w-full flex items-center justify-center">
+            <FaSignOutAlt className="mr-2" />
             Logout
           </Button>
         </div>

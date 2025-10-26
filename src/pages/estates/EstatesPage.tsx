@@ -8,16 +8,17 @@ import AddEstateModal from './AddEstateModal';
 import EditEstateModal from './EditEstateModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
+import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
 
 // Define the type for an estate object
-export interface Estate {
+export type Estate = {
   id: string;
   name: string;
   code: string;
   location: string;
   description: string;
   is_active: boolean;
-}
+};
 
 const EstatesPage: React.FC = () => {
   const [estates, setEstates] = useState<Estate[]>([]);
@@ -105,7 +106,10 @@ const EstatesPage: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-mine-shaft">Estates Management</h1>
-        <Button onClick={() => setIsAddModalOpen(true)}>Add Estate</Button>
+        <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
+          <FaPlus className="mr-2" />
+          Add Estate
+        </Button>
       </div>
 
       {estates.length === 0 ? (
@@ -125,7 +129,9 @@ const EstatesPage: React.FC = () => {
                     setSelectedEstate(estate);
                     setIsEditModalOpen(true);
                   }}
+                  className="flex items-center"
                 >
+                  <FaPencilAlt className="mr-2" />
                   Edit
                 </Button>
                 <Button
@@ -135,7 +141,9 @@ const EstatesPage: React.FC = () => {
                     setSelectedEstate(estate);
                     setIsDeleteModalOpen(true);
                   }}
+                  className="flex items-center"
                 >
+                  <FaTrash className="mr-2" />
                   Delete
                 </Button>
               </div>

@@ -8,6 +8,7 @@ import AddItemModal from './AddItemModal';
 import EditItemModal from './EditItemModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
+import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
 
 // Define the type for an item object
 export interface Item {
@@ -121,7 +122,10 @@ const ItemsPage: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-mine-shaft">Items Management</h1>
-        <Button onClick={() => setIsAddModalOpen(true)}>Add Item</Button>
+        <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
+          <FaPlus className="mr-2" />
+          Add Item
+        </Button>
       </div>
 
       {items.length === 0 ? (
@@ -142,7 +146,9 @@ const ItemsPage: React.FC = () => {
                     setSelectedItem(item);
                     setIsEditModalOpen(true);
                   }}
+                  className="flex items-center"
                 >
+                  <FaPencilAlt className="mr-2" />
                   Edit
                 </Button>
                 <Button
@@ -152,7 +158,9 @@ const ItemsPage: React.FC = () => {
                     setSelectedItem(item);
                     setIsDeleteModalOpen(true);
                   }}
+                  className="flex items-center"
                 >
+                  <FaTrash className="mr-2" />
                   Delete
                 </Button>
               </div>

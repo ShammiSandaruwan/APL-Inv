@@ -30,12 +30,14 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gin">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gin px-4">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <img src={logo} alt="Company Logo" className="w-32 mx-auto" />
-        <h1 className="text-2xl font-bold text-center text-mine-shaft">
-          Estate Asset Management
-        </h1>
+        <div className="flex flex-col items-center text-center">
+          <img src={logo} alt="Company Logo" className="w-32 mb-4" />
+          <h1 className="text-2xl font-bold text-mine-shaft">
+            Estate Asset Management
+          </h1>
+        </div>
         <form onSubmit={handleLogin} className="space-y-6">
           <Input
             id="email"
