@@ -1,5 +1,5 @@
 // src/pages/estates/AddEstateModal.tsx
-import React, 'react';
+import React from 'react';
 import Modal from '../../components/Modal';
 import Input from '../../components/Input';
 import Button from '../../components/Button';

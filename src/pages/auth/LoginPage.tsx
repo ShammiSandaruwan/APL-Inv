@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabaseClient';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
+import logo from '../../assets/logo.png';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -31,6 +32,7 @@ const LoginPage: React.FC = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gin">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <img src={logo} alt="Company Logo" className="w-32 mx-auto" />
         <h1 className="text-2xl font-bold text-center text-mine-shaft">
           Estate Asset Management
         </h1>

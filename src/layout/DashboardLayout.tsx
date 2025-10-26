@@ -3,6 +3,7 @@ import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import Button from '../components/Button';
+import logo from '../assets/logo.png';
 
 const DashboardLayout: React.FC = () => {
   const handleLogout = async () => {
@@ -16,7 +17,7 @@ const DashboardLayout: React.FC = () => {
     <div className="flex h-screen bg-gin">
       <aside className="w-64 flex-shrink-0 bg-white shadow-md">
         <div className="p-4">
-          <h1 className="text-2xl font-bold text-mine-shaft">Estate Mgmt</h1>
+          <img src={logo} alt="Company Logo" className="w-24 mx-auto" />
         </div>
         <nav className="p-2">
           <NavLink to="/" end className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}>
