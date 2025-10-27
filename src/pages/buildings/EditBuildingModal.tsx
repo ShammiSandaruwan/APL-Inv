@@ -49,7 +49,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ isOpen, onClose, 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (building) {
-      onUpdateBuilding({ ...building, name, code, estate_id: parseInt(estateId, 10), building_type: buildingType });
+      onUpdateBuilding({ ...building, name, code, estate_id: estateId, building_type: buildingType });
     }
   };
 

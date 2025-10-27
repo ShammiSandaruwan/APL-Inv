@@ -38,7 +38,7 @@ const AddBuildingModal: React.FC<AddBuildingModalProps> = ({ isOpen, onClose, on
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAddBuilding({ name, code, estate_id: parseInt(estateId, 10), building_type: buildingType });
+    onAddBuilding({ name, code, estate_id: estateId, building_type: buildingType });
   };
 
   return (

@@ -52,6 +52,8 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAddItem 
         } else {
           setBuildings(data as Building[]);
         }
+      } else {
+        setBuildings([]);
       }
     };
 
@@ -60,7 +62,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAddItem 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAddItem({ name, item_code: itemCode, building_id: parseInt(buildingId, 10), photos });
+    onAddItem({ name, item_code: itemCode, estate_id: parseInt(estateId, 10), building_id: parseInt(buildingId, 10), photos });
   };
 
   return (

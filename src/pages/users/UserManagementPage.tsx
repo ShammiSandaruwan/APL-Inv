@@ -4,10 +4,11 @@ import { supabase } from '../../lib/supabaseClient';
 import Spinner from '../../components/Spinner';
 import Button from '../../components/Button';
 import Table from '../../components/Table';
+import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
-import { FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
 
 // Define the type for a user profile object
 export interface UserProfile {
@@ -19,6 +20,7 @@ export interface UserProfile {
 const UserManagementPage: React.FC = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
@@ -39,21 +41,10 @@ const UserManagementPage: React.FC = () => {
     fetchUsers();
   }, []);
 
-  // NOTE: Inviting users requires the Supabase Admin key and should be
-  // handled in a secure, server-side environment (e.g., a Supabase Edge Function).
-  // This has been disabled in the UI for security reasons.
-  // const handleAddUser = async (email: string, fullName: string) => {
-  //   const { error } = await supabase.auth.admin.inviteUserByEmail(email, {
-  //     data: { full_name: fullName },
-  //   });
-  //
-  //   if (error) {
-  //     showErrorToast(error.message);
-  //   } else {
-  //     showSuccessToast(`Invitation sent to ${email}`);
-  //     setIsAddModalOpen(false);
-  //   }
-  // };
+  const handleAddUser = async (_email: string, _fullName: string) => {
+    showSuccessToast('This feature is for demonstration purposes. A secure server-side function is required to invite users.');
+    setIsAddModalOpen(false);
+  };
 
   const handleUpdateUser = async (updatedUser: UserProfile) => {
     const { data, error } = await supabase
@@ -99,10 +90,10 @@ const UserManagementPage: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-mine-shaft">User Management</h1>
-        {/* <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
+        <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
           <FaPlus className="mr-2" />
           Add User
-        </Button> */}
+        </Button>
       </div>
 
       <Table
@@ -136,11 +127,11 @@ const UserManagementPage: React.FC = () => {
         )}
       />
 
-      {/* <AddUserModal
+      <AddUserModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAddUser={handleAddUser}
-      /> */}
+      />
 
       <EditUserModal
         isOpen={isEditModalOpen}

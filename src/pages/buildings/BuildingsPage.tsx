@@ -45,7 +45,7 @@ const BuildingsPage: React.FC = () => {
     fetchBuildings();
   }, []);
 
-  const handleAddBuilding = async (building: { name: string; code: string; estate_id: number; building_type: string }) => {
+  const handleAddBuilding = async (building: { name: string; code: string; estate_id: string; building_type: string }) => {
     const { data, error } = await supabase
       .from('buildings')
       .insert([building])
@@ -115,7 +115,7 @@ const BuildingsPage: React.FC = () => {
     return buildings
       .filter(building =>
         building.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (estateFilter === '' || building.estate_id === parseInt(estateFilter, 10)) &&
+        (estateFilter === '' || building.estate_id === estateFilter) &&
         (typeFilter === '' || building.building_type === typeFilter)
       )
       .sort((a, b) => {

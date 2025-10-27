@@ -53,6 +53,8 @@ const EditItemModal: React.FC<EditItemModalProps> = ({ isOpen, onClose, onUpdate
         } else {
           setBuildings(data as Building[]);
         }
+      } else {
+        setBuildings([]);
       }
     };
 

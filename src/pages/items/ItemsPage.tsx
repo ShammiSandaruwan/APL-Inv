@@ -48,7 +48,7 @@ const ItemsPage: React.FC = () => {
   const handleAddItem = async (item: Omit<Item, 'id' | 'buildings' | 'created_at'>) => {
     const { data, error } = await supabase
       .from('items')
-      .insert([item])
+      .insert(item)
       .select('*, buildings(*, estates(*))')
       .single();
 
@@ -85,6 +85,7 @@ const ItemsPage: React.FC = () => {
       .update({
         name: updatedItem.name,
         item_code: updatedItem.item_code,
+        estate_id: updatedItem.estate_id,
         building_id: updatedItem.building_id,
         photos: updatedItem.photos,
       })
