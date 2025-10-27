@@ -3,11 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import Spinner from '../../components/Spinner';
 import Button from '../../components/Button';
-import Card from '../../components/Card';
 import AddBuildingModal from './AddBuildingModal';
 import EditBuildingModal from './EditBuildingModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import EmptyState from '../../components/EmptyState';
+import Table from '../../components/Table';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import type { Estate } from '../estates/EstatesPage';
 import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
@@ -107,6 +107,15 @@ const BuildingsPage: React.FC = () => {
     }
   };
 
+  const columns = [
+    { header: 'Name', accessor: 'name' },
+    { header: 'Code', accessor: 'code' },
+    { header: 'Estate', accessor: 'estateName' },
+    { header: 'Type', accessor: 'building_type' },
+  ];
+
+  const tableData = buildings.map(b => ({ ...b, estateName: b.estates.name }));
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
@@ -133,42 +142,36 @@ const BuildingsPage: React.FC = () => {
           onActionClick={() => setIsAddModalOpen(true)}
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {buildings.map((building) => (
-            <Card key={building.id}>
-              <h2 className="text-xl font-semibold">{building.name}</h2>
-              <p className="text-scorpion">Code: {building.code}</p>
-              <p className="text-scorpion">Estate: {building.estates.name}</p>
-              <p className="text-scorpion">Type: {building.building_type}</p>
-              <div className="mt-4 flex justify-end space-x-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedBuilding(building);
-                    setIsEditModalOpen(true);
-                  }}
-                  className="flex items-center"
-                >
-                  <FaPencilAlt className="mr-2" />
-                  Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedBuilding(building);
-                    setIsDeleteModalOpen(true);
-                  }}
-                  className="flex items-center"
-                >
-                  <FaTrash className="mr-2" />
-                  Delete
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
+        <Table
+          columns={columns}
+          data={tableData}
+          renderActions={(building) => (
+            <div className="flex space-x-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setSelectedBuilding(building);
+                  setIsEditModalOpen(true);
+                }}
+                className="flex items-center"
+              >
+                <FaPencilAlt />
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => {
+                  setSelectedBuilding(building);
+                  setIsDeleteModalOpen(true);
+                }}
+                className="flex items-center"
+              >
+                <FaTrash />
+              </Button>
+            </div>
+          )}
+        />
       )}
 
       <AddBuildingModal

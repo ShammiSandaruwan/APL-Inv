@@ -10,7 +10,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 const Input: React.FC<InputProps> = ({ label, id, name, error, className = '', ...props }) => {
   // Base styles for the input
   const baseStyles =
-    'mt-1 block w-full px-3 py-2 bg-white border border-silver-chalice rounded-md text-sm shadow-sm placeholder-scorpion focus:outline-none focus:ring-bay-leaf focus:border-bay-leaf';
+    'mt-1 block w-full px-4 py-2.5 bg-white border border-silver-chalice rounded-lg text-sm shadow-sm placeholder-scorpion focus:outline-none focus:ring-1 focus:ring-bay-leaf focus:border-bay-leaf transition-shadow duration-200';
 
   // Styles for when there is an error
   const errorStyles = 'border-red-500 text-red-600 focus:border-red-500 focus:ring-red-500';

@@ -3,11 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import Spinner from '../../components/Spinner';
 import Button from '../../components/Button';
-import Card from '../../components/Card';
 import AddEstateModal from './AddEstateModal';
 import EditEstateModal from './EditEstateModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import EmptyState from '../../components/EmptyState';
+import Table from '../../components/Table';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
 
@@ -95,6 +95,12 @@ const EstatesPage: React.FC = () => {
     }
   };
 
+  const columns = [
+    { header: 'Name', accessor: 'name' },
+    { header: 'Code', accessor: 'code' },
+    { header: 'Location', accessor: 'location' },
+  ];
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
@@ -121,41 +127,36 @@ const EstatesPage: React.FC = () => {
           onActionClick={() => setIsAddModalOpen(true)}
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {estates.map((estate) => (
-            <Card key={estate.id}>
-              <h2 className="text-xl font-semibold">{estate.name}</h2>
-              <p className="text-scorpion">Code: {estate.code}</p>
-              <p className="text-scorpion">Location: {estate.location}</p>
-              <div className="mt-4 flex justify-end space-x-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedEstate(estate);
-                    setIsEditModalOpen(true);
-                  }}
-                  className="flex items-center"
-                >
-                  <FaPencilAlt className="mr-2" />
-                  Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedEstate(estate);
-                    setIsDeleteModalOpen(true);
-                  }}
-                  className="flex items-center"
-                >
-                  <FaTrash className="mr-2" />
-                  Delete
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
+        <Table
+          columns={columns}
+          data={estates}
+          renderActions={(estate) => (
+            <div className="flex space-x-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setSelectedEstate(estate);
+                  setIsEditModalOpen(true);
+                }}
+                className="flex items-center"
+              >
+                <FaPencilAlt />
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => {
+                  setSelectedEstate(estate);
+                  setIsDeleteModalOpen(true);
+                }}
+                className="flex items-center"
+              >
+                <FaTrash />
+              </Button>
+            </div>
+          )}
+        />
       )}
 
       <AddEstateModal
