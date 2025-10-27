@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Modal from '../../components/Modal';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import type { Building } from './BuildingsPage';
+import type { Building } from '../../types';
 import type { Estate } from '../estates/EstatesPage';
 import { supabase } from '../../lib/supabaseClient';
 import { showErrorToast } from '../../utils/toast';
@@ -41,7 +41,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ isOpen, onClose, 
     if (building) {
       setName(building.name);
       setCode(building.code);
-      setEstateId(building.estate_id);
+      setEstateId(building.estate_id.toString());
       setBuildingType(building.building_type);
     }
   }, [building]);
@@ -49,7 +49,7 @@ const EditBuildingModal: React.FC<EditBuildingModalProps> = ({ isOpen, onClose, 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (building) {
-      onUpdateBuilding({ ...building, name, code, estate_id: estateId, building_type: buildingType });
+      onUpdateBuilding({ ...building, name, code, estate_id: parseInt(estateId, 10), building_type: buildingType });
     }
   };
 

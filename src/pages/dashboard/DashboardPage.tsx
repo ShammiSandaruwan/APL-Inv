@@ -1,8 +1,38 @@
 // src/pages/dashboard/DashboardPage.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../../lib/supabaseClient';
+import { showErrorToast } from '../../utils/toast';
+import StatCard from '../../components/StatCard';
+import { FaBuilding, FaBoxOpen, FaGlobeAmericas } from 'react-icons/fa';
+import Spinner from '../../components/Spinner';
 
 const DashboardPage: React.FC = () => {
+  const [stats, setStats] = useState({ estates: 0, buildings: 0, items: 0 });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setIsLoading(true);
+      const { count: estatesCount, error: estatesError } = await supabase.from('estates').select('*', { count: 'exact', head: true });
+      const { count: buildingsCount, error: buildingsError } = await supabase.from('buildings').select('*', { count: 'exact', head: true });
+      const { count: itemsCount, error: itemsError } = await supabase.from('items').select('*', { count: 'exact', head: true });
+
+      if (estatesError || buildingsError || itemsError) {
+        showErrorToast('Failed to load dashboard statistics.');
+      } else {
+        setStats({
+          estates: estatesCount || 0,
+          buildings: buildingsCount || 0,
+          items: itemsCount || 0,
+        });
+      }
+      setIsLoading(false);
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <div>
       <div className="mb-8">
@@ -11,6 +41,18 @@ const DashboardPage: React.FC = () => {
           Here's a quick overview of your asset management system.
         </p>
       </div>
+
+      {isLoading ? (
+        <div className="flex justify-center items-center h-32">
+          <Spinner />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <StatCard title="Total Estates" value={stats.estates} icon={<FaGlobeAmericas className="text-salem" />} />
+          <StatCard title="Total Buildings" value={stats.buildings} icon={<FaBuilding className="text-salem" />} />
+          <StatCard title="Total Items" value={stats.items} icon={<FaBoxOpen className="text-salem" />} />
+        </div>
+      )}
 
       <div>
         <h2 className="text-xl font-semibold mb-4 text-mine-shaft">Management Sections</h2>

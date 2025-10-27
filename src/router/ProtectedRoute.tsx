@@ -1,34 +1,16 @@
 // src/router/ProtectedRoute.tsx
-import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../hooks/useAuth';
 import Spinner from '../components/Spinner';
 
-const ProtectedRoute: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+const ProtectedRoute = () => {
+  const { session, isLoading } = useAuth();
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-    };
-
-    checkSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
-  if (isAuthenticated === null) {
+  if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen"><Spinner /></div>;
   }
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
+  return session ? <Outlet /> : <Navigate to="/login" />;
 };
 
 export default ProtectedRoute;

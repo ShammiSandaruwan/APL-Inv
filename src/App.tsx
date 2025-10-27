@@ -6,44 +6,44 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import EstatesPage from './pages/estates/EstatesPage';
 import BuildingsPage from './pages/buildings/BuildingsPage';
 import ItemsPage from './pages/items/ItemsPage';
+import CategoriesPage from './pages/categories/CategoriesPage';
+import EstateDetailPage from './pages/estates/EstateDetailPage';
+import BuildingDetailPage from './pages/buildings/BuildingDetailPage';
+import UserManagementPage from './pages/users/UserManagementPage';
+import ReportsPage from './pages/reports/ReportsPage';
+import AuditLogsPage from './pages/audit/AuditLogsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './router/ProtectedRoute';
 import DashboardLayout from './layout/DashboardLayout';
 import Toast from './components/Toast';
-import { supabase } from './lib/supabaseClient';
+import { useAuth } from './hooks/useAuth';
+import Spinner from './components/Spinner';
 
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = React.useState<boolean | null>(null);
+  const { session, isLoading } = useAuth();
 
-  React.useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-    };
-
-    checkSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-    });
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen"><Spinner /></div>;
+  }
 
   return (
     <>
       <Toast />
       <Router>
         <Routes>
-          <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} />
+          <Route path="/login" element={session ? <Navigate to="/" /> : <LoginPage />} />
           <Route path="/" element={<ProtectedRoute />}>
             <Route element={<DashboardLayout />}>
               <Route index element={<DashboardPage />} />
               <Route path="estates" element={<EstatesPage />} />
+              <Route path="estates/:id" element={<EstateDetailPage />} />
               <Route path="buildings" element={<BuildingsPage />} />
+              <Route path="buildings/:id" element={<BuildingDetailPage />} />
               <Route path="items" element={<ItemsPage />} />
+              <Route path="categories" element={<CategoriesPage />} />
+              <Route path="users" element={<UserManagementPage />} />
+              <Route path="reports" element={<ReportsPage />} />
+              <Route path="audit-logs" element={<AuditLogsPage />} />
             </Route>
           </Route>
           <Route path="*" element={<NotFoundPage />} />

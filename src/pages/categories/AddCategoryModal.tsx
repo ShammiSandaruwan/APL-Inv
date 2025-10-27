@@ -1,31 +1,31 @@
-// src/pages/estates/AddEstateModal.tsx
-import React from 'react';
+// src/pages/categories/AddCategoryModal.tsx
+import React, { useState } from 'react';
 import Modal from '../../components/Modal';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import type { Estate } from '../../types';
+import type { Category } from './CategoriesPage';
 
-interface AddEstateModalProps {
+interface AddCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddEstate: (estate: Omit<Estate, 'id' | 'is_active'>) => void;
+  onAddCategory: (category: Omit<Category, 'id'>) => void;
 }
 
-const AddEstateModal: React.FC<AddEstateModalProps> = ({ isOpen, onClose, onAddEstate }) => {
-  const [name, setName] = React.useState('');
-  const [code, setCode] = React.useState('');
-  const [location, setLocation] = React.useState('');
+const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ isOpen, onClose, onAddCategory }) => {
+  const [name, setName] = useState('');
+  const [code, setCode] = useState('');
+  const [description, setDescription] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAddEstate({ name, code, location, description: '' });
+    onAddCategory({ name, code, description });
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add New Estate">
+    <Modal isOpen={isOpen} onClose={onClose} title="Add New Category">
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
-          label="Estate Name"
+          label="Category Name"
           id="name"
           name="name"
           type="text"
@@ -34,7 +34,7 @@ const AddEstateModal: React.FC<AddEstateModalProps> = ({ isOpen, onClose, onAddE
           onChange={(e) => setName(e.target.value)}
         />
         <Input
-          label="Estate Code"
+          label="Category Code"
           id="code"
           name="code"
           type="text"
@@ -43,19 +43,19 @@ const AddEstateModal: React.FC<AddEstateModalProps> = ({ isOpen, onClose, onAddE
           onChange={(e) => setCode(e.target.value)}
         />
         <Input
-          label="Location/City"
-          id="location"
-          name="location"
+          label="Description"
+          id="description"
+          name="description"
           type="text"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
         <div className="flex justify-end space-x-2 pt-4">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel
           </Button>
           <Button type="submit">
-            Save Estate
+            Save Category
           </Button>
         </div>
       </form>
@@ -63,4 +63,4 @@ const AddEstateModal: React.FC<AddEstateModalProps> = ({ isOpen, onClose, onAddE
   );
 };
 
-export default AddEstateModal;
+export default AddCategoryModal;

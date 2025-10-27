@@ -3,9 +3,10 @@ import React, { useEffect, useState } from 'react';
 import Modal from '../../components/Modal';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import type { Item } from './ItemsPage';
+import ImageUpload from '../../components/ImageUpload';
+import type { Item } from '../../types';
 import type { Estate } from '../estates/EstatesPage';
-import type { Building } from '../buildings/BuildingsPage';
+import type { Building } from '../../types';
 import { supabase } from '../../lib/supabaseClient';
 import { showErrorToast } from '../../utils/toast';
 
@@ -21,6 +22,7 @@ const EditItemModal: React.FC<EditItemModalProps> = ({ isOpen, onClose, onUpdate
   const [itemCode, setItemCode] = useState('');
   const [estateId, setEstateId] = useState('');
   const [buildingId, setBuildingId] = useState('');
+  const [photos, setPhotos] = useState<string[]>([]);
   const [estates, setEstates] = useState<Estate[]>([]);
   const [buildings, setBuildings] = useState<Building[]>([]);
 
@@ -61,15 +63,16 @@ const EditItemModal: React.FC<EditItemModalProps> = ({ isOpen, onClose, onUpdate
     if (item) {
       setName(item.name);
       setItemCode(item.item_code);
-      setEstateId(item.buildings.estates.id);
-      setBuildingId(item.building_id);
+      setEstateId(item.buildings?.estates?.id?.toString() || '');
+      setBuildingId(item.building_id.toString());
+      setPhotos(item.photos || []);
     }
   }, [item]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (item) {
-      onUpdateItem({ ...item, name, item_code: itemCode, building_id: buildingId });
+      onUpdateItem({ ...item, name, item_code: itemCode, building_id: parseInt(buildingId, 10), photos });
     }
   };
 
@@ -138,6 +141,7 @@ const EditItemModal: React.FC<EditItemModalProps> = ({ isOpen, onClose, onUpdate
             ))}
           </select>
         </div>
+        <ImageUpload onUpload={setPhotos} initialUrls={photos} />
         <div className="flex justify-end space-x-2 pt-4">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel

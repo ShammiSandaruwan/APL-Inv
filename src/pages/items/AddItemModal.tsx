@@ -3,10 +3,11 @@ import React, { useEffect, useState } from 'react';
 import Modal from '../../components/Modal';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import type { Item } from './ItemsPage';
+import ImageUpload from '../../components/ImageUpload';
 import type { Estate } from '../estates/EstatesPage';
-import type { Building } from '../buildings/BuildingsPage';
+import type { Building } from '../../types';
 import { supabase } from '../../lib/supabaseClient';
+import type { Item } from '../../types';
 import { showErrorToast } from '../../utils/toast';
 
 interface AddItemModalProps {
@@ -20,6 +21,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAddItem 
   const [itemCode, setItemCode] = useState('');
   const [estateId, setEstateId] = useState('');
   const [buildingId, setBuildingId] = useState('');
+  const [photos, setPhotos] = useState<string[]>([]);
   const [estates, setEstates] = useState<Estate[]>([]);
   const [buildings, setBuildings] = useState<Building[]>([]);
 
@@ -58,7 +60,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAddItem 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAddItem({ name, item_code: itemCode, building_id: buildingId });
+    onAddItem({ name, item_code: itemCode, building_id: parseInt(buildingId, 10), photos });
   };
 
   return (
@@ -126,6 +128,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAddItem 
             ))}
           </select>
         </div>
+        <ImageUpload onUpload={setPhotos} />
         <div className="flex justify-end space-x-2 pt-4">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel

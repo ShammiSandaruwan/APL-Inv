@@ -1,5 +1,6 @@
 // src/pages/buildings/BuildingsPage.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 import Spinner from '../../components/Spinner';
 import Button from '../../components/Button';
@@ -8,19 +9,10 @@ import EditBuildingModal from './EditBuildingModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import EmptyState from '../../components/EmptyState';
 import Table from '../../components/Table';
+import Input from '../../components/Input';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
-import type { Estate } from '../estates/EstatesPage';
-import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
-
-// Define the type for a building object
-export interface Building {
-  id: string;
-  name: string;
-  code: string;
-  estate_id: string;
-  building_type: string;
-  estates: Estate;
-}
+import { FaPlus, FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
+import type { Building } from '../../types';
 
 const BuildingsPage: React.FC = () => {
   const [buildings, setBuildings] = useState<Building[]>([]);
@@ -29,6 +21,11 @@ const BuildingsPage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [estateFilter, setEstateFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [sortBy, setSortBy] = useState('name');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBuildings = async () => {
@@ -48,7 +45,7 @@ const BuildingsPage: React.FC = () => {
     fetchBuildings();
   }, []);
 
-  const handleAddBuilding = async (building: Omit<Building, 'id' | 'estates'>) => {
+  const handleAddBuilding = async (building: { name: string; code: string; estate_id: number; building_type: string }) => {
     const { data, error } = await supabase
       .from('buildings')
       .insert([building])
@@ -114,7 +111,27 @@ const BuildingsPage: React.FC = () => {
     { header: 'Type', accessor: 'building_type' },
   ];
 
-  const tableData = buildings.map(b => ({ ...b, estateName: b.estates.name }));
+  const filteredAndSortedBuildings = useMemo(() => {
+    return buildings
+      .filter(building =>
+        building.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (estateFilter === '' || building.estate_id === parseInt(estateFilter, 10)) &&
+        (typeFilter === '' || building.building_type === typeFilter)
+      )
+      .sort((a, b) => {
+        if (sortBy === 'name') {
+          return a.name.localeCompare(b.name);
+        } else if (sortBy === 'date') {
+          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        }
+        return 0;
+      });
+  }, [buildings, searchTerm, estateFilter, typeFilter, sortBy]);
+
+  const uniqueEstates = [...new Map(buildings.map(b => [b.estates?.id, b.estates])).values()];
+  const uniqueTypes = [...new Set(buildings.map(b => b.building_type))];
+
+  const tableData = filteredAndSortedBuildings.map(b => ({ ...b, estateName: b.estates?.name }));
 
   if (isLoading) {
     return (
@@ -134,7 +151,43 @@ const BuildingsPage: React.FC = () => {
         </Button>
       </div>
 
-      {buildings.length === 0 ? (
+      <div className="mb-4 flex space-x-4">
+        <Input
+          placeholder="Search by name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select
+          value={estateFilter}
+          onChange={(e) => setEstateFilter(e.target.value)}
+          className="mt-1 block w-full px-3 py-2 bg-white border border-silver-chalice rounded-md text-sm shadow-sm placeholder-scorpion focus:outline-none focus:ring-bay-leaf focus:border-bay-leaf"
+        >
+          <option value="">All Estates</option>
+          {uniqueEstates.map(estate => estate && (
+            <option key={estate.id} value={estate.id}>{estate.name}</option>
+          ))}
+        </select>
+        <select
+          value={typeFilter}
+          onChange={(e) => setTypeFilter(e.target.value)}
+          className="mt-1 block w-full px-3 py-2 bg-white border border-silver-chalice rounded-md text-sm shadow-sm placeholder-scorpion focus:outline-none focus:ring-bay-leaf focus:border-bay-leaf"
+        >
+          <option value="">All Types</option>
+          {uniqueTypes.map(type => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </select>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="mt-1 block w-full px-3 py-2 bg-white border border-silver-chalice rounded-md text-sm shadow-sm placeholder-scorpion focus:outline-none focus:ring-bay-leaf focus:border-bay-leaf"
+        >
+          <option value="name">Sort by Name</option>
+          <option value="date">Sort by Date</option>
+        </select>
+      </div>
+
+      {filteredAndSortedBuildings.length === 0 ? (
         <EmptyState
           title="No Buildings Found"
           message="Get started by adding your first building to the system."
@@ -147,6 +200,14 @@ const BuildingsPage: React.FC = () => {
           data={tableData}
           renderActions={(building) => (
             <div className="flex space-x-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => navigate(`/buildings/${building.id}`)}
+                className="flex items-center"
+              >
+                <FaEye />
+              </Button>
               <Button
                 variant="secondary"
                 size="sm"

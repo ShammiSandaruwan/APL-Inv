@@ -4,7 +4,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import Button from '../components/Button';
 import logo from '../assets/logo.png';
-import { FaTachometerAlt, FaBuilding, FaBoxOpen, FaSignOutAlt } from 'react-icons/fa';
+import { FaTachometerAlt, FaBuilding, FaBoxOpen, FaSignOutAlt, FaTags, FaUsers, FaChartBar, FaHistory } from 'react-icons/fa';
 
 const DashboardLayout: React.FC = () => {
   const handleLogout = async () => {
@@ -36,6 +36,22 @@ const DashboardLayout: React.FC = () => {
           <NavLink to="/items" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}>
             <FaBoxOpen className="mr-3" />
             Items
+          </NavLink>
+          <NavLink to="/categories" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}>
+            <FaTags className="mr-3" />
+            Categories
+          </NavLink>
+          <NavLink to="/users" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}>
+            <FaUsers className="mr-3" />
+            Users
+          </NavLink>
+          <NavLink to="/reports" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}>
+            <FaChartBar className="mr-3" />
+            Reports
+          </NavLink>
+          <NavLink to="/audit-logs" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''}`}>
+            <FaHistory className="mr-3" />
+            Audit Logs
           </NavLink>
         </nav>
         <div className="p-4">
