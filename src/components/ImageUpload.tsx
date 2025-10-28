@@ -69,14 +69,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUpload, initialUrls = [] })
         </div>
       </div>
       {isUploading && <p className="text-sm text-scorpion mt-2">Uploading...</p>}
-      <div className="mt-4 grid grid-cols-3 gap-4">
+      <div className="mt-4 grid grid-cols-4 gap-2">
         {imageUrls.map((url) => (
-          <div key={url} className="relative">
-            <img src={url} alt="Uploaded" className="w-full h-auto rounded-lg" />
+          <div key={url} className="relative w-24 h-24">
+            <img src={url} alt="Uploaded" className="w-full h-full object-cover rounded-lg" />
             <button
               type="button"
               onClick={() => handleRemoveImage(url)}
-              className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1"
+              className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 text-xs hover:bg-red-700 transition-colors"
             >
               <FaTrash />
             </button>

@@ -11,7 +11,7 @@ interface OccupancyModalProps {
   isOpen: boolean;
   onClose: () => void;
   building: Building | null;
-  onUpdate: () => void;
+  onUpdate: (updatedBuilding: Building) => void;
 }
 
 const OccupancyModal: React.FC<OccupancyModalProps> = ({ isOpen, onClose, building, onUpdate }) => {
@@ -30,20 +30,22 @@ const OccupancyModal: React.FC<OccupancyModalProps> = ({ isOpen, onClose, buildi
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (building) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('buildings')
         .update({
           occupied_by: occupiedBy,
           occupant_designation: occupantDesignation,
           occupancy_start_date: occupancyStartDate,
         })
-        .eq('id', building.id);
+        .eq('id', building.id)
+        .select()
+        .single();
 
       if (error) {
         showErrorToast(error.message);
-      } else {
+      } else if (data) {
         showSuccessToast('Occupancy updated successfully!');
-        onUpdate();
+        onUpdate(data as Building);
       }
     }
   };

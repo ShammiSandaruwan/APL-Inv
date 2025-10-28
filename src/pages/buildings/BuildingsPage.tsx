@@ -113,8 +113,6 @@ const BuildingsPage: React.FC = () => {
   const columns = [
     { header: 'Name', accessor: 'name' },
     { header: 'Code', accessor: 'code' },
-    { header: 'Name', accessor: 'name' },
-    { header: 'Code', accessor: 'code' },
     { header: 'Estate', accessor: 'estateName' },
     { header: 'Type', accessor: 'building_type' },
     { header: 'Occupied By', accessor: 'occupied_by' },
@@ -271,8 +269,8 @@ const BuildingsPage: React.FC = () => {
         isOpen={isOccupancyModalOpen}
         onClose={() => setIsOccupancyModalOpen(false)}
         building={selectedBuilding}
-        onUpdate={() => {
-          // fetchBuildings();
+        onUpdate={(updatedBuilding) => {
+          setBuildings(buildings.map((b) => (b.id === updatedBuilding.id ? updatedBuilding : b)));
           setIsOccupancyModalOpen(false);
         }}
       />
