@@ -6,7 +6,9 @@
 
 @layer base {
   body {
-    @apply font-sans bg-gin-light text-mine-shaft;
+    /* The font-sans utility is removed from here.
+       It is applied by default through the tailwind.config.js theme extension. */
+    @apply bg-gin-light text-mine-shaft;
   }
 
   h1, h2, h3, h4, h5, h6 {
