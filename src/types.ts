@@ -1,7 +1,7 @@
 // src/types.ts
 
 export interface Estate {
-  id?: number;
+  id?: string;
   name: string;
   code: string;
   location: string;
@@ -11,10 +11,10 @@ export interface Estate {
 }
 
 export interface Building {
-  id?: number;
+  id?: string;
   name: string;
   code: string;
-  estate_id: number;
+  estate_id: string;
   building_type: string;
   created_at?: string;
   estates?: Estate;
@@ -24,11 +24,11 @@ export interface Building {
 }
 
 export interface Item {
-  id?: number;
+  id?: string;
   name: string;
   item_code: string;
-  estate_id: number;
-  building_id: number;
+  estate_id: string;
+  building_id: string;
   photos: string[];
   created_at?: string;
   buildings?: Building;

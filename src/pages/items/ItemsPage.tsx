@@ -52,18 +52,35 @@ const ItemsPage: React.FC = () => {
   }, []);
 
   const handleAddItem = async (item: Omit<Item, 'id' | 'buildings' | 'created_at'>) => {
-    const { data, error } = await supabase
-      .from('items')
-      .insert(item)
-      .select('*, buildings(*, estates(*))')
-      .single();
+    try {
+      // Explicitly check for missing foreign keys which are required by the database
+      if (!item.estate_id || !item.building_id) {
+        throw new Error('An estate and a building must be selected.');
+      }
 
-    if (error) {
-      showErrorToast(error.message);
-    } else if (data) {
-      setItems([...items, data as Item]);
-      showSuccessToast('Item added successfully!');
-      setIsAddModalOpen(false);
+      const { data, error } = await supabase
+        .from('items')
+        .insert(item)
+        .select('*, buildings(*, estates(*))')
+        .single();
+
+      if (error) {
+        // If Supabase returns an error, it will be thrown and caught here
+        throw error;
+      }
+
+      if (data) {
+        setItems(prevItems => [...prevItems, data as Item]);
+        showSuccessToast('Item added successfully!');
+        setIsAddModalOpen(false);
+      } else {
+        // Handle the unlikely case where Supabase returns neither data nor an error
+        throw new Error('An unknown error occurred during item creation.');
+      }
+    } catch (err: any) {
+      // Centralized error handling for any failure in the try block
+      console.error('Error in handleAddItem:', err);
+      showErrorToast(err.message || 'Failed to add item. Please try again.');
     }
   };
 

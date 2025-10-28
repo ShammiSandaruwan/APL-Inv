@@ -5,11 +5,11 @@ import { showErrorToast, showSuccessToast } from '../utils/toast';
 import { FaUpload, FaTrash } from 'react-icons/fa';
 
 interface ImageUploadProps {
-  onUpload: (urls: string[]) => void;
+  onPhotoChange: (urls: string[]) => void;
   initialUrls?: string[];
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ onUpload, initialUrls = [] }) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({ onPhotoChange, initialUrls = [] }) => {
   const [imageUrls, setImageUrls] = useState<string[]>(initialUrls);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -38,7 +38,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUpload, initialUrls = [] })
 
     const newUrls = [...imageUrls, ...uploadedUrls];
     setImageUrls(newUrls);
-    onUpload(newUrls);
+    onPhotoChange(newUrls);
     setIsUploading(false);
     showSuccessToast('Images uploaded successfully!');
   };
@@ -46,7 +46,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUpload, initialUrls = [] })
   const handleRemoveImage = (urlToRemove: string) => {
     const newUrls = imageUrls.filter(url => url !== urlToRemove);
     setImageUrls(newUrls);
-    onUpload(newUrls);
+    onPhotoChange(newUrls);
   };
 
   return (

@@ -69,8 +69,8 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAddItem 
     onAddItem({
       name,
       item_code: itemCode,
-      estate_id: parseInt(estateId, 10),
-      building_id: parseInt(buildingId, 10),
+      estate_id: estateId,
+      building_id: buildingId,
       photos,
     });
   };
@@ -140,7 +140,7 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAddItem 
             ))}
           </select>
         </div>
-        <ImageUpload onUpload={setPhotos} />
+        <ImageUpload onPhotoChange={setPhotos} />
         <div className="flex justify-end space-x-2 pt-4">
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancel

@@ -41,82 +41,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // This effect runs once to get the initial session
-    const getInitialSession = async () => {
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      setSession(initialSession);
-      setUser(initialSession?.user ?? null);
-      if (!initialSession) {
-        setIsLoading(false);
-      }
-    };
+    let isMounted = true;
 
-    getInitialSession();
+    const fetchSessionAndProfile = async (session: Session | null) => {
+      if (!isMounted) return;
 
-    // Set up a listener for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-      // If the user logs out, we can stop loading
-      if (_event === 'SIGNED_OUT') {
-        setProfile(null);
-        setPermissions(null);
-        setIsLoading(false);
-      }
-    });
+      let userProfile: UserProfile | null = null;
+      let userPermissions: Permissions | null = null;
 
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    // This effect runs when the user state changes to fetch profile and permissions
-    const fetchProfileAndPermissions = async () => {
-      if (user) {
-        // Fetch user profile
+      if (session?.user) {
         const { data: profileData, error: profileError } = await supabase
           .from('user_profiles')
           .select('*')
-          .eq('id', user.id)
+          .eq('id', session.user.id)
           .single();
 
         if (profileError) {
           console.error('Error fetching profile:', profileError);
-          setProfile(null);
         } else {
-          setProfile(profileData as UserProfile);
-        }
-
-        // Fetch permissions if the user is a co_admin
-        if (profileData?.role === 'co_admin') {
-          const { data: permsData, error: permsError } = await supabase
-            .from('co_admin_permissions')
-            .select('*')
-            .eq('user_id', user.id)
-            .single();
-
-          if (permsError) {
-            console.error('Error fetching permissions:', permsError);
-            setPermissions(null);
-          } else {
-            setPermissions(permsData);
+          userProfile = profileData as UserProfile;
+          if (userProfile?.role === 'co_admin') {
+            const { data: permsData, error: permsError } = await supabase
+              .from('co_admin_permissions')
+              .select('*')
+              .eq('user_id', session.user.id)
+              .single();
+            if (permsError) {
+              console.error('Error fetching permissions:', permsError);
+            } else {
+              userPermissions = permsData;
+            }
           }
-        } else {
-          // Non-co_admins have no specific permissions
-          setPermissions(null);
         }
-      } else {
-        // No user, so no profile or permissions
-        setProfile(null);
-        setPermissions(null);
       }
-      // Finished loading profile data
-      setIsLoading(false);
+
+      if (isMounted) {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setProfile(userProfile);
+        setPermissions(userPermissions);
+        setIsLoading(false);
+      }
     };
 
-    fetchProfileAndPermissions();
-  }, [user]);
+    // Fetch initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      fetchSessionAndProfile(session);
+    });
+
+    // Subscribe to auth state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      fetchSessionAndProfile(session);
+    });
+
+    return () => {
+      isMounted = false;
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const signOut = async () => {
     await supabase.auth.signOut();
