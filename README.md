@@ -1,28 +1,16 @@
 # Estate Asset Management System
 
-This is a web application for managing assets across multiple estates, built as an MVP based on the provided project brief. It allows a Super Admin to manage estates, buildings, and the items within them.
+This is a comprehensive, production-ready Estate Asset Management System to digitalize and manage estates with their buildings, furniture, equipment, and inventory.
 
-## Features
+## 🚀 Quick Start
 
-*   **Authentication:** Secure login for Super Admins.
-*   **Estate Management:** Full CRUD (Create, Read, Update, Delete) functionality for estates.
-*   **Building Management:** Full CRUD functionality for buildings, with each building linked to an estate.
-*   **Item Management:** Full CRUD functionality for items, with each item linked to a building and estate.
-*   **Modern UI:** A clean, responsive user interface built with React and Tailwind CSS.
-
-## Tech Stack
-
-*   **Frontend:** Vite, React, TypeScript
-*   **Backend & Database:** Supabase (PostgreSQL, Auth, Storage)
-*   **Styling:** Tailwind CSS
-
-## Project Setup
+To get the application running locally, follow these steps:
 
 ### Prerequisites
 
-*   Node.js (v18 or higher)
-*   npm
-*   A Supabase account
+-   Node.js (v18 or later)
+-   npm (v9 or later)
+-   A Supabase account
 
 ### 1. Clone the Repository
 
@@ -39,49 +27,84 @@ npm install
 
 ### 3. Set Up Supabase
 
-1.  Create a new project on [Supabase](https://supabase.com/).
-2.  In your Supabase project, go to the **SQL Editor**.
-3.  Execute the contents of `mvp_schema.sql` to create the necessary tables.
-4.  Execute the contents of `storage_setup.sql` to create the storage bucket for photos.
-5.  In your Supabase project, go to **Authentication** and add a new user. This will be your Super Admin account.
+1.  **Create a new Supabase project.**
+2.  Navigate to the **SQL Editor** in your Supabase project dashboard.
+3.  Execute the following SQL scripts from the `supabase/` directory in this order:
+    1.  `mvp_schema.sql` - Sets up the initial tables for estates, buildings, and items.
+    2.  `storage_setup.sql` - Configures the public bucket for image storage.
+    3.  `audit_log_schema.sql` - Creates the audit trail table and triggers.
+    4.  `user_roles_schema.sql` - Adds user profile management and role-based security.
+    5.  `secure_get_my_role.sql` - Adds a security function to prevent infinite recursion in RLS policies.
+    6. `make_bucket_public.sql` - Makes the storage bucket public.
+4.  Navigate to **Authentication -> Users** and create a new user. This will be your initial "Super Admin" account.
+5.  Navigate to **Project Settings -> API**. You will need the **Project URL** and the **`anon` public API Key**.
 
 ### 4. Configure Environment Variables
 
-1.  Create a `.env.local` file in the root of the project.
-2.  Add your Supabase project URL and anon key to the file:
+1.  Create a file named `.env.local` in the root of the project.
+2.  Add your Supabase credentials to the file:
 
     ```
-    VITE_SUPABASE_URL=your-supabase-project-url
-    VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+    VITE_SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
+    VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_PUBLIC_KEY
     ```
 
-    You can find these in your Supabase project's **API Settings**.
-
-### 5. Run the Application
+### 5. Run the Development Server
 
 ```bash
 npm run dev
 ```
 
-The application will now be running on `http://localhost:5173`.
+The application should now be running at `http://localhost:5173`.
 
-## Project Structure
+## ✨ Features
 
-```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── components/      # Reusable UI components (Button, Card, etc.)
-│   ├── layout/          # Layout components (DashboardLayout)
-│   ├── lib/             # Supabase client initialization
-│   ├── pages/           # Application pages (Estates, Buildings, Items)
-│   ├── router/          # Routing components (ProtectedRoute)
-│   ├── utils/           # Utility functions (toast notifications)
-│   ├── App.tsx          # Main application component with routing
-│   ├── index.css        # Tailwind CSS directives
-│   └── main.tsx         # Application entry point
-├── mvp_schema.sql       # Database schema setup script
-├── storage_setup.sql    # Supabase Storage setup script
-└── README.md
-```
+-   **Dashboard**: At-a-glance overview of all assets, recent activity, and quick actions.
+-   **CRUD Operations**: Full Create, Read, Update, and Delete functionality for:
+    -   Estates
+    -   Buildings
+    -   Items (Assets)
+    -   Categories
+-   **Role-Based Access Control**:
+    -   **Super Admin**: Full system control.
+    -   **Co-Admin**: Customizable, estate-restricted access.
+    -   **Estate User**: Limited to a single assigned estate.
+-   **Photo Management**: Upload multiple images for each item via a drag-and-drop interface.
+-   **Advanced Data Management**:
+    -   Filtering
+    -   Sorting
+    -   Searching
+-   **Reporting**: Export filtered data to CSV.
+-   **Audit Trail**: Comprehensive logging of all system activities for accountability.
+-   **Secure**: Built on Supabase with Row Level Security (RLS) to protect data at the database level.
+
+## 🛠️ Tech Stack
+
+-   **Frontend**: Vite, React, TypeScript
+-   **Styling**: Tailwind CSS
+-   **Backend & Database**: Supabase (PostgreSQL, Auth, Storage)
+-   **Deployment**: Vercel (Frontend), Supabase (Backend)
+
+## 🎨 UI Components
+
+A reusable component library was built to maintain a consistent look and feel, including:
+-   `Button`
+-   `Input`
+-   `Card`
+-   `Modal`
+-   `Table`
+-   `Spinner`
+-   `Toast` notifications
+
+## 🔐 Security
+
+-   **Authentication**: Managed by Supabase Auth.
+-   **Authorization**: Enforced by PostgreSQL's Row Level Security (RLS). All data access is restricted based on the user's role and permissions, ensuring users can only see the data they are authorized to access.
+-   **User Management**: User creation is handled through the Supabase dashboard to maintain a secure invitation process.
+
+## 📝 Future Enhancements
+
+-   Item Transfers between buildings.
+-   Advanced reporting with PDF and Excel exports.
+-   Analytics dashboard with data visualizations.
+-   In-app user invitations via a secure server-side function.

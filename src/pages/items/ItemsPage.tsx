@@ -8,11 +8,12 @@ import EditItemModal from './EditItemModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import EmptyState from '../../components/EmptyState';
 import Table from '../../components/Table';
-import ItemDetailModal from './ItemDetailModal';
 import Input from '../../components/Input';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import { FaPlus, FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
 import type { Item } from '../../types';
+import { useAuth } from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 const ItemsPage: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -20,12 +21,17 @@ const ItemsPage: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [estateFilter, setEstateFilter] = useState('');
   const [buildingFilter, setBuildingFilter] = useState('');
   const [sortBy, setSortBy] = useState('name');
+  const { profile, permissions } = useAuth();
+
+  const canCreate = profile?.role === 'super_admin' || profile?.role === 'estate_user' || permissions?.can_create_items;
+  const canEdit = profile?.role === 'super_admin' || profile?.role === 'estate_user' || permissions?.can_edit_items;
+  const canDelete = profile?.role === 'super_admin' || profile?.role === 'estate_user' || permissions?.can_delete_items;
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -150,10 +156,12 @@ const ItemsPage: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-mine-shaft">Items Management</h1>
-        <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
-          <FaPlus className="mr-2" />
-          Add Item
-        </Button>
+        {canCreate && (
+          <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
+            <FaPlus className="mr-2" />
+            Add Item
+          </Button>
+        )}
       </div>
 
       <div className="mb-4 flex space-x-4">
@@ -208,36 +216,37 @@ const ItemsPage: React.FC = () => {
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => {
-                  setSelectedItem(item);
-                  setIsDetailModalOpen(true);
-                }}
+                onClick={() => navigate(`/items/${item.id}`)}
                 className="flex items-center"
               >
                 <FaEye />
               </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setSelectedItem(item);
-                  setIsEditModalOpen(true);
-                }}
-                className="flex items-center"
-              >
-                <FaPencilAlt />
-              </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => {
-                  setSelectedItem(item);
-                  setIsDeleteModalOpen(true);
-                }}
-                className="flex items-center"
-              >
-                <FaTrash />
-              </Button>
+              {canEdit && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedItem(item);
+                    setIsEditModalOpen(true);
+                  }}
+                  className="flex items-center"
+                >
+                  <FaPencilAlt />
+                </Button>
+              )}
+              {canDelete && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedItem(item);
+                    setIsDeleteModalOpen(true);
+                  }}
+                  className="flex items-center"
+                >
+                  <FaTrash />
+                </Button>
+              )}
             </div>
           )}
         />
@@ -267,10 +276,12 @@ const ItemsPage: React.FC = () => {
       )}
 
       {selectedItem && (
-        <ItemDetailModal
-          isOpen={isDetailModalOpen}
-          onClose={() => setIsDetailModalOpen(false)}
-          item={selectedItem}
+        <ConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleDeleteItem}
+          title="Delete Item"
+          message={`Are you sure you want to delete the item "${selectedItem.name}"? This action cannot be undone.`}
         />
       )}
     </div>

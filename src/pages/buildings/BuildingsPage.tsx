@@ -7,12 +7,14 @@ import Button from '../../components/Button';
 import AddBuildingModal from './AddBuildingModal';
 import EditBuildingModal from './EditBuildingModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import OccupancyModal from './OccupancyModal';
 import EmptyState from '../../components/EmptyState';
 import Table from '../../components/Table';
 import Input from '../../components/Input';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
-import { FaPlus, FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
+import { FaPlus, FaPencilAlt, FaTrash, FaEye, FaUser } from 'react-icons/fa';
 import type { Building } from '../../types';
+import { useAuth } from '../../hooks/useAuth';
 
 const BuildingsPage: React.FC = () => {
   const [buildings, setBuildings] = useState<Building[]>([]);
@@ -20,12 +22,16 @@ const BuildingsPage: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isOccupancyModalOpen, setIsOccupancyModalOpen] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [estateFilter, setEstateFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const navigate = useNavigate();
+  const { profile, permissions } = useAuth();
+
+  const canManage = profile?.role === 'super_admin' || (profile?.role === 'co_admin' && permissions?.can_manage_buildings);
 
   useEffect(() => {
     const fetchBuildings = async () => {
@@ -45,7 +51,7 @@ const BuildingsPage: React.FC = () => {
     fetchBuildings();
   }, []);
 
-  const handleAddBuilding = async (building: { name: string; code: string; estate_id: string; building_type: string }) => {
+  const handleAddBuilding = async (building: Omit<Building, 'id' | 'estates'>) => {
     const { data, error } = await supabase
       .from('buildings')
       .insert([building])
@@ -107,15 +113,18 @@ const BuildingsPage: React.FC = () => {
   const columns = [
     { header: 'Name', accessor: 'name' },
     { header: 'Code', accessor: 'code' },
+    { header: 'Name', accessor: 'name' },
+    { header: 'Code', accessor: 'code' },
     { header: 'Estate', accessor: 'estateName' },
     { header: 'Type', accessor: 'building_type' },
+    { header: 'Occupied By', accessor: 'occupied_by' },
   ];
 
   const filteredAndSortedBuildings = useMemo(() => {
     return buildings
       .filter(building =>
         building.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (estateFilter === '' || building.estate_id === estateFilter) &&
+        (estateFilter === '' || building.estate_id === parseInt(estateFilter, 10)) &&
         (typeFilter === '' || building.building_type === typeFilter)
       )
       .sort((a, b) => {
@@ -145,10 +154,12 @@ const BuildingsPage: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-mine-shaft">Buildings Management</h1>
-        <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
-          <FaPlus className="mr-2" />
-          Add Building
-        </Button>
+        {canManage && (
+          <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
+            <FaPlus className="mr-2" />
+            Add Building
+          </Button>
+        )}
       </div>
 
       <div className="mb-4 flex space-x-4">
@@ -213,23 +224,38 @@ const BuildingsPage: React.FC = () => {
                 size="sm"
                 onClick={() => {
                   setSelectedBuilding(building);
-                  setIsEditModalOpen(true);
+                  setIsOccupancyModalOpen(true);
                 }}
                 className="flex items-center"
               >
-                <FaPencilAlt />
+                <FaUser />
               </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => {
-                  setSelectedBuilding(building);
-                  setIsDeleteModalOpen(true);
-                }}
-                className="flex items-center"
-              >
-                <FaTrash />
-              </Button>
+              {canManage && (
+                <>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedBuilding(building);
+                      setIsEditModalOpen(true);
+                    }}
+                    className="flex items-center"
+                  >
+                    <FaPencilAlt />
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedBuilding(building);
+                      setIsDeleteModalOpen(true);
+                    }}
+                    className="flex items-center"
+                  >
+                    <FaTrash />
+                  </Button>
+                </>
+              )}
             </div>
           )}
         />
@@ -239,6 +265,16 @@ const BuildingsPage: React.FC = () => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAddBuilding={handleAddBuilding}
+      />
+
+      <OccupancyModal
+        isOpen={isOccupancyModalOpen}
+        onClose={() => setIsOccupancyModalOpen(false)}
+        building={selectedBuilding}
+        onUpdate={() => {
+          // fetchBuildings();
+          setIsOccupancyModalOpen(false);
+        }}
       />
 
       <EditBuildingModal

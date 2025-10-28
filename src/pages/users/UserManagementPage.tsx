@@ -7,8 +7,9 @@ import Table from '../../components/Table';
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import PermissionsModal from './PermissionsModal';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
-import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaPencilAlt, FaTrash, FaShieldAlt } from 'react-icons/fa';
 
 // Define the type for a user profile object
 export interface UserProfile {
@@ -23,6 +24,7 @@ const UserManagementPage: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
 
   useEffect(() => {
@@ -101,6 +103,19 @@ const UserManagementPage: React.FC = () => {
         data={users}
         renderActions={(user) => (
           <div className="flex space-x-2">
+            {user.role === 'co_admin' && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setSelectedUser(user);
+                  setIsPermissionsModalOpen(true);
+                }}
+                className="flex items-center"
+              >
+                <FaShieldAlt />
+              </Button>
+            )}
             <Button
               variant="secondary"
               size="sm"
@@ -131,6 +146,12 @@ const UserManagementPage: React.FC = () => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAddUser={handleAddUser}
+      />
+
+      <PermissionsModal
+        isOpen={isPermissionsModalOpen}
+        onClose={() => setIsPermissionsModalOpen(false)}
+        user={selectedUser}
       />
 
       <EditUserModal

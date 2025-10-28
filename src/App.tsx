@@ -1,6 +1,6 @@
 // src/App.tsx
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import EstatesPage from './pages/estates/EstatesPage';
@@ -9,6 +9,7 @@ import ItemsPage from './pages/items/ItemsPage';
 import CategoriesPage from './pages/categories/CategoriesPage';
 import EstateDetailPage from './pages/estates/EstateDetailPage';
 import BuildingDetailPage from './pages/buildings/BuildingDetailPage';
+import ItemDetailPage from './pages/items/ItemDetailPage';
 import UserManagementPage from './pages/users/UserManagementPage';
 import ReportsPage from './pages/reports/ReportsPage';
 import AuditLogsPage from './pages/audit/AuditLogsPage';
@@ -29,26 +30,25 @@ const App: React.FC = () => {
   return (
     <>
       <Toast />
-      <Router>
-        <Routes>
-          <Route path="/login" element={session ? <Navigate to="/" /> : <LoginPage />} />
-          <Route path="/" element={<ProtectedRoute />}>
-            <Route element={<DashboardLayout />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="estates" element={<EstatesPage />} />
-              <Route path="estates/:id" element={<EstateDetailPage />} />
-              <Route path="buildings" element={<BuildingsPage />} />
-              <Route path="buildings/:id" element={<BuildingDetailPage />} />
-              <Route path="items" element={<ItemsPage />} />
-              <Route path="categories" element={<CategoriesPage />} />
-              <Route path="users" element={<UserManagementPage />} />
-              <Route path="reports" element={<ReportsPage />} />
-              <Route path="audit-logs" element={<AuditLogsPage />} />
-            </Route>
+      <Routes>
+        <Route path="/login" element={session ? <Navigate to="/" /> : <LoginPage />} />
+        <Route path="/" element={<ProtectedRoute />}>
+          <Route element={<DashboardLayout />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="estates" element={<EstatesPage />} />
+            <Route path="estates/:id" element={<EstateDetailPage />} />
+            <Route path="buildings" element={<BuildingsPage />} />
+            <Route path="buildings/:id" element={<BuildingDetailPage />} />
+            <Route path="items" element={<ItemsPage />} />
+            <Route path="items/:id" element={<ItemDetailPage />} />
+            <Route path="categories" element={<CategoriesPage />} />
+            <Route path="users" element={<UserManagementPage />} />
+            <Route path="reports" element={<ReportsPage />} />
+            <Route path="audit-logs" element={<AuditLogsPage />} />
           </Route>
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </Router>
+        </Route>
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
     </>
   );
 };

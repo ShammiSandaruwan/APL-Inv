@@ -12,6 +12,7 @@ import Table from '../../components/Table';
 import Input from '../../components/Input';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import { FaPlus, FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
+import { useAuth } from '../../hooks/useAuth';
 
 // Define the type for an estate object
 export type Estate = {
@@ -35,6 +36,9 @@ const EstatesPage: React.FC = () => {
   const [locationFilter, setLocationFilter] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const navigate = useNavigate();
+  const { profile, permissions } = useAuth();
+
+  const canManage = profile?.role === 'super_admin' || (profile?.role === 'co_admin' && permissions?.can_manage_estates);
 
   useEffect(() => {
     const fetchEstates = async () => {
@@ -138,10 +142,12 @@ const EstatesPage: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-mine-shaft">Estates Management</h1>
-        <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
-          <FaPlus className="mr-2" />
-          Add Estate
-        </Button>
+        {canManage && (
+          <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
+            <FaPlus className="mr-2" />
+            Add Estate
+          </Button>
+        )}
       </div>
 
       <div className="mb-4 flex space-x-4">
@@ -191,28 +197,32 @@ const EstatesPage: React.FC = () => {
               >
                 <FaEye />
               </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setSelectedEstate(estate);
-                  setIsEditModalOpen(true);
-                }}
-                className="flex items-center"
-              >
-                <FaPencilAlt />
-              </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => {
-                  setSelectedEstate(estate);
-                  setIsDeleteModalOpen(true);
-                }}
-                className="flex items-center"
-              >
-                <FaTrash />
-              </Button>
+              {canManage && (
+                <>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedEstate(estate);
+                      setIsEditModalOpen(true);
+                    }}
+                    className="flex items-center"
+                  >
+                    <FaPencilAlt />
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedEstate(estate);
+                      setIsDeleteModalOpen(true);
+                    }}
+                    className="flex items-center"
+                  >
+                    <FaTrash />
+                  </Button>
+                </>
+              )}
             </div>
           )}
         />
