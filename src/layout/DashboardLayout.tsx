@@ -5,70 +5,71 @@ import { supabase } from '../lib/supabaseClient';
 import Button from '../components/Button';
 import logo from '../assets/logo.png';
 import { FaTachometerAlt, FaBuilding, FaBoxOpen, FaSignOutAlt, FaTags, FaUsers, FaChartBar, FaHistory, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { useAuth } from '../hooks/useAuth'; // Get user info
 
 const DashboardLayout: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { profile } = useAuth();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
 
-  const linkStyles = "flex items-center px-4 py-2 text-scorpion rounded-md hover:bg-gin transition-colors duration-200 border-l-4 border-transparent";
-  const activeLinkStyles = "bg-gin text-salem font-bold border-salem";
+  const baseLink = "flex items-center text-text-secondary rounded-lg hover:bg-primary-light hover:text-primary transition-all duration-200";
+  const linkStyles = `${baseLink} py-2.5 px-4`;
+  const collapsedLinkStyles = `${baseLink} h-10 w-10 justify-center`;
+  const activeLinkStyles = "bg-primary-light text-primary font-semibold";
 
   return (
-    <div className="flex h-screen bg-gin">
-      <aside className={`transition-all duration-300 bg-white shadow-md flex flex-col ${isCollapsed ? 'w-20' : 'w-64'}`}>
-        <div className="p-4 flex justify-between items-center">
-          {!isCollapsed && <img src={logo} alt="Company Logo" className="w-24 mx-auto transition-opacity duration-300" />}
-          <button onClick={() => setIsCollapsed(!isCollapsed)} className="text-scorpion hover:text-salem">
+    <div className="flex h-screen bg-background text-text-primary">
+      {/* Sidebar */}
+      <aside className={`transition-all duration-300 ease-in-out bg-card border-r border-border flex flex-col ${isCollapsed ? 'w-20' : 'w-64'}`}>
+        <div className={`p-4 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+          {!isCollapsed && <img src={logo} alt="Company Logo" className="w-32 transition-opacity duration-300" />}
+          <button onClick={() => setIsCollapsed(!isCollapsed)} className="text-text-secondary hover:text-primary">
             {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
           </button>
         </div>
-        <nav className="p-2 flex-1">
-          <NavLink to="/" end className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''} ${isCollapsed ? 'justify-center' : ''}`}>
-            <FaTachometerAlt className={isCollapsed ? '' : 'mr-3'} />
-            {!isCollapsed && 'Dashboard'}
-          </NavLink>
-          <NavLink to="/estates" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''} ${isCollapsed ? 'justify-center' : ''}`}>
-            <FaBuilding className={isCollapsed ? '' : 'mr-3'} />
-            {!isCollapsed && 'Estates'}
-          </NavLink>
-          <NavLink to="/buildings" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''} ${isCollapsed ? 'justify-center' : ''}`}>
-            <FaBuilding className={isCollapsed ? '' : 'mr-3'} />
-            {!isCollapsed && 'Buildings'}
-          </NavLink>
-          <NavLink to="/items" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''} ${isCollapsed ? 'justify-center' : ''}`}>
-            <FaBoxOpen className={isCollapsed ? '' : 'mr-3'} />
-            {!isCollapsed && 'Items'}
-          </NavLink>
-          <NavLink to="/categories" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''} ${isCollapsed ? 'justify-center' : ''}`}>
-            <FaTags className={isCollapsed ? '' : 'mr-3'} />
-            {!isCollapsed && 'Categories'}
-          </NavLink>
-          <NavLink to="/users" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''} ${isCollapsed ? 'justify-center' : ''}`}>
-            <FaUsers className={isCollapsed ? '' : 'mr-3'} />
-            {!isCollapsed && 'Users'}
-          </NavLink>
-          <NavLink to="/reports" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''} ${isCollapsed ? 'justify-center' : ''}`}>
-            <FaChartBar className={isCollapsed ? '' : 'mr-3'} />
-            {!isCollapsed && 'Reports'}
-          </NavLink>
-          <NavLink to="/audit-logs" className={({ isActive }) => `${linkStyles} ${isActive ? activeLinkStyles : ''} ${isCollapsed ? 'justify-center' : ''}`}>
-            <FaHistory className={isCollapsed ? '' : 'mr-3'} />
-            {!isCollapsed && 'Audit Logs'}
-          </NavLink>
+
+        <nav className="flex-1 px-4 space-y-2">
+          {[
+            { to: "/", icon: FaTachometerAlt, label: "Dashboard" },
+            { to: "/estates", icon: FaBuilding, label: "Estates" },
+            { to: "/buildings", icon: FaBuilding, label: "Buildings" },
+            { to: "/items", icon: FaBoxOpen, label: "Items" },
+            { to: "/categories", icon: FaTags, label: "Categories" },
+            { to: "/users", icon: FaUsers, label: "Users" },
+            { to: "/reports", icon: FaChartBar, label: "Reports" },
+            { to: "/audit-logs", icon: FaHistory, label: "Audit Logs" },
+          ].map(link => (
+            <NavLink key={link.to} to={link.to} end={link.to === "/"} className={({ isActive }) => `${isCollapsed ? collapsedLinkStyles : linkStyles} ${isActive ? activeLinkStyles : ''}`}>
+              <link.icon className={`text-lg ${!isCollapsed ? 'mr-4' : ''}`} />
+              {!isCollapsed && <span>{link.label}</span>}
+            </NavLink>
+          ))}
         </nav>
-        <div className="p-4">
-          <Button onClick={handleLogout} variant="secondary" className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'}`}>
-            <FaSignOutAlt className={isCollapsed ? '' : 'mr-2'} />
-            {!isCollapsed && 'Logout'}
-          </Button>
+
+        <div className="p-4 border-t border-border">
+          <div className={`flex items-center ${isCollapsed ? 'flex-col' : ''}`}>
+            {!isCollapsed && (
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-text-primary">{profile?.full_name}</p>
+                <p className="text-xs text-text-secondary">{profile?.role}</p>
+              </div>
+            )}
+            <Button onClick={handleLogout} variant="secondary" size="sm" className={`mt-2 ${isCollapsed ? '' : 'ml-2'}`}>
+              <FaSignOutAlt />
+            </Button>
+          </div>
         </div>
       </aside>
-      <main className="flex-1 p-8 overflow-y-auto">
-        <Outlet />
-      </main>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 overflow-y-auto p-8">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 };

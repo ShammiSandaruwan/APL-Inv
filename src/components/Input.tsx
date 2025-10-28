@@ -1,36 +1,31 @@
 // src/components/Input.tsx
 import React from 'react';
 
-// Define the props for the Input component
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
 }
 
 const Input: React.FC<InputProps> = ({ label, id, name, error, className = '', ...props }) => {
-  // Base styles for the input
-  const baseStyles =
-    'mt-1 block w-full px-4 py-2.5 bg-white border border-gin-dark rounded-lg text-base shadow-sm placeholder-scorpion focus:outline-none focus:ring-2 focus:ring-bay-leaf focus:border-transparent transition-all duration-300';
+  const baseStyles = 'block w-full px-3 py-2 bg-card border border-border rounded-lg text-sm text-text-primary placeholder-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors duration-200';
 
-  // Styles for when there is an error
-  const errorStyles = 'border-red-500 text-red-600 focus:ring-red-500';
+  const errorStyles = 'border-danger text-danger focus:ring-danger';
 
-  // Combine styles
-  const combinedClassName = `
-    ${baseStyles}
-    ${error ? errorStyles : ''}
-    ${className}
-  `;
+  const combinedClassName = [
+    baseStyles,
+    error ? errorStyles : '',
+    className
+  ].join(' ');
 
   return (
     <div className="w-full">
       {label && (
-        <label htmlFor={id || name} className="block text-sm font-medium text-mine-shaft">
+        <label htmlFor={id || name} className="block text-sm font-semibold text-text-primary mb-1.5">
           {label}
         </label>
       )}
-      <input id={id || name} name={name} className={combinedClassName} {...props} />
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      <input id={id || name} name={name} className={combinedClassName.trim()} {...props} />
+      {error && <p className="mt-1.5 text-xs text-danger">{error}</p>}
     </div>
   );
 };

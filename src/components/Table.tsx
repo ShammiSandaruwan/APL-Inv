@@ -14,15 +14,15 @@ interface TableProps {
 
 const Table: React.FC<TableProps> = ({ columns, data, renderActions }) => {
   return (
-    <div className="bg-white border border-gin-dark rounded-lg overflow-hidden shadow-subtle">
-      <table className="min-w-full">
-        <thead className="bg-gin-light">
+    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-card">
+      <table className="min-w-full divide-y divide-border">
+        <thead className="bg-background">
           <tr>
             {columns.map((col) => (
               <th
                 key={col.accessor}
                 scope="col"
-                className="px-6 py-4 text-left text-sm font-semibold text-mine-shaft uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-semibold text-text-secondary uppercase tracking-wider"
               >
                 {col.header}
               </th>
@@ -34,11 +34,11 @@ const Table: React.FC<TableProps> = ({ columns, data, renderActions }) => {
             )}
           </tr>
         </thead>
-        <tbody>
+        <tbody className="divide-y divide-border">
           {data.map((item, index) => (
-            <tr key={index} className="hover:bg-gin-light border-b border-gin-dark last:border-b-0">
+            <tr key={index} className="hover:bg-background transition-colors duration-200">
               {columns.map((col) => (
-                <td key={col.accessor} className="px-6 py-5 whitespace-nowrap text-base text-mine-shaft">
+                <td key={col.accessor} className="px-6 py-4 whitespace-nowrap text-sm text-text-primary">
                   {item[col.accessor]}
                 </td>
               ))}

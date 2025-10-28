@@ -9,33 +9,34 @@ export default {
   theme: {
     extend: {
       colors: {
-        salem: {
-          light: '#428d59',
-          DEFAULT: '#096e2a',
-          dark: '#064a1d',
+        background: '#F9FAFB', // Light gray background
+        primary: {
+          DEFAULT: '#096e2a', // Main deep teal from reference
+          hover: '#065a22',
+          light: '#e6f1e9',
         },
-        gin: {
-          light: '#f0f4f2',
-          DEFAULT: '#e4ede7',
-          dark: '#c9d4cd',
+        secondary: '#6B7280', // Medium gray for text
+        accent: '#3B82F6', // A blue for highlights if needed, can be adjusted
+        border: '#E5E7EB', // Light gray for borders
+        card: '#FFFFFF', // Card background
+        text: {
+          primary: '#1F2937', // Dark gray for primary text
+          secondary: '#6B7280', // Lighter gray for secondary text
         },
-        'mine-shaft': {
-          light: '#3a3a3a',
-          DEFAULT: '#211e1e',
-          dark: '#000000',
-        },
-        'bay-leaf': '#84b292',
-        scorpion: '#5c5b5b',
-        goblin: '#428d59',
-        'gum-leaf': '#b2cebb',
-        'silver-chalice': '#adacac',
+        success: '#10B981',
+        danger: '#EF4444',
+        warning: '#F59E0B',
       },
       fontFamily: {
         sans: ['Inter', ...fontFamily.sans],
       },
       boxShadow: {
-        'subtle': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
-        'lifted': '0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07)',
+        'card': '0px 1px 3px rgba(0, 0, 0, 0.05), 0px 1px 2px rgba(0, 0, 0, 0.06)',
+        'interactive': '0 0 0 2px #F9FAFB, 0 0 0 4px #a4cafe',
+      },
+      borderRadius: {
+        'lg': '0.75rem',
+        'xl': '1rem',
       },
     },
   },

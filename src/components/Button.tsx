@@ -1,7 +1,6 @@
 // src/components/Button.tsx
 import React from 'react';
 
-// Define the props for the Button component
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'danger';
@@ -17,44 +16,39 @@ const Button: React.FC<ButtonProps> = ({
   className = '',
   ...props
 }) => {
-  // Base styles for the button
-  const baseStyles = 'rounded-md font-semibold focus:outline-none transition-all duration-200 shadow-subtle hover:shadow-lifted transform hover:-translate-y-0.5';
+  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-lg focus:outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
-  // Variant-specific styles using the provided color palette
   const variantStyles = {
-    primary: 'bg-salem text-white hover:bg-salem-dark focus:ring-2 focus:ring-salem-light focus:ring-offset-2',
-    secondary: 'bg-white text-mine-shaft border border-gin-dark hover:bg-gin-light focus:ring-2 focus:ring-bay-leaf focus:ring-offset-2',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2',
+    primary: 'bg-primary text-white hover:bg-primary-hover focus-visible:ring-primary',
+    secondary: 'bg-card text-text-primary border border-border hover:bg-background focus-visible:ring-secondary',
+    danger: 'bg-danger text-white hover:bg-red-700 focus-visible:ring-danger',
   };
 
-  // Size-specific styles
   const sizeStyles = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    sm: 'px-3 py-1.5 text-xs',
+    md: 'px-4 py-2 text-sm',
+    lg: 'px-5 py-2.5 text-base',
   };
 
-  // Disabled state styles
-  const disabledStyles = 'disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none';
+  const disabledStyles = 'disabled:opacity-50 disabled:cursor-not-allowed';
 
-  // Combine all styles
-  const combinedClassName = `
-    ${baseStyles}
-    ${variantStyles[variant]}
-    ${sizeStyles[size]}
-    ${disabledStyles}
-    ${className}
-  `;
+  const combinedClassName = [
+    baseStyles,
+    variantStyles[variant],
+    sizeStyles[size],
+    disabledStyles,
+    className,
+  ].join(' ');
 
   return (
-    <button className={combinedClassName} disabled={isLoading} {...props}>
+    <button className={combinedClassName.trim()} disabled={isLoading || props.disabled} {...props}>
       {isLoading ? (
-        <div className="flex items-center justify-center">
-          <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+        <div className="flex items-center">
+          <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
           </svg>
-          Processing...
+          Loading...
         </div>
       ) : (
         children
