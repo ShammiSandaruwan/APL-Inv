@@ -19,9 +19,9 @@ const Button: React.FC<ButtonProps> = ({
   const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-lg focus:outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background';
 
   const variantStyles = {
-    primary: 'bg-primary text-white hover:bg-primary-hover focus-visible:ring-primary',
-    secondary: 'bg-card text-text-primary border border-border hover:bg-background focus-visible:ring-secondary',
-    danger: 'bg-danger text-white hover:bg-red-700 focus-visible:ring-danger',
+    primary: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg hover:shadow-blue-200 transition-all duration-200',
+    secondary: 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 hover:border-gray-400',
+    danger: 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:shadow-lg hover:shadow-red-200',
   };
 
   const sizeStyles = {
