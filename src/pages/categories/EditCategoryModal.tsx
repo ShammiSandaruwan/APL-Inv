@@ -1,74 +1,97 @@
 // src/pages/categories/EditCategoryModal.tsx
-import React, { useEffect, useState } from 'react';
-import Modal from '../../components/Modal';
-import Input from '../../components/Input';
-import Button from '../../components/Button';
-import type { Category } from './CategoriesPage';
+import {
+  Button,
+  Group,
+  Modal,
+  Stack,
+  Textarea,
+  TextInput,
+} from '@mantine/core';
+import { useForm } from '@mantine/form';
+import React, { useEffect } from 'react';
+import type { Category } from '../../types';
 
 interface EditCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpdateCategory: (category: Category) => void;
   category: Category | null;
+  isLoading: boolean;
 }
 
-const EditCategoryModal: React.FC<EditCategoryModalProps> = ({ isOpen, onClose, onUpdateCategory, category }) => {
-  const [name, setName] = useState('');
-  const [code, setCode] = useState('');
-  const [description, setDescription] = useState('');
+const EditCategoryModal: React.FC<EditCategoryModalProps> = ({
+  isOpen,
+  onClose,
+  onUpdateCategory,
+  category,
+  isLoading,
+}) => {
+  const form = useForm<Omit<Category, 'id' | 'created_at'>>({
+    initialValues: {
+      name: '',
+      code: '',
+      description: '',
+    },
+    validate: {
+      name: (value) => (value.trim().length > 0 ? null : 'Category name is required'),
+      code: (value) => (value.trim().length > 0 ? null : 'Category code is required'),
+    },
+  });
 
   useEffect(() => {
     if (category) {
-      setName(category.name);
-      setCode(category.code);
-      setDescription(category.description);
+      form.setValues({
+        name: category.name,
+        code: category.code,
+        description: category.description || '',
+      });
     }
   }, [category]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (values: Omit<Category, 'id' | 'created_at'>) => {
     if (category) {
-      onUpdateCategory({ ...category, name, code, description });
+      onUpdateCategory({
+        ...category,
+        ...values,
+      });
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Category">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Category Name"
-          id="name"
-          name="name"
-          type="text"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <Input
-          label="Category Code"
-          id="code"
-          name="code"
-          type="text"
-          required
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-        />
-        <Input
-          label="Description"
-          id="description"
-          name="description"
-          type="text"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="submit">
-            Save Changes
-          </Button>
-        </div>
+    <Modal opened={isOpen} onClose={onClose} title="Edit Category" centered>
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        <Stack gap="md">
+          <TextInput
+            required
+            label="Category Name"
+            placeholder="e.g., Furniture"
+            {...form.getInputProps('name')}
+          />
+          <TextInput
+            required
+            label="Category Code"
+            placeholder="e.g., FURN-001"
+            {...form.getInputProps('code')}
+          />
+          <Textarea
+            label="Description"
+            placeholder="Optional description"
+            {...form.getInputProps('description')}
+          />
+          <Group justify="flex-end" mt="md">
+            <Button
+              variant="outline"
+              color="gray"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" loading={isLoading}>
+              Save Changes
+            </Button>
+          </Group>
+        </Stack>
       </form>
     </Modal>
   );

@@ -1,23 +1,23 @@
 // src/pages/categories/CategoriesPage.tsx
+import {
+  ActionIcon,
+  Button,
+  Group,
+  Loader,
+  Stack,
+  Title,
+  Tooltip,
+} from '@mantine/core';
+import { IconPencil, IconPlus, IconTrash } from '@tabler/icons-react';
+import { DataTable } from 'mantine-datatable';
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
-import Spinner from '../../components/Spinner';
-import Button from '../../components/Button';
-import Table from '../../components/Table';
+import ConfirmationModal from '../../components/ConfirmationModal';
 import EmptyState from '../../components/EmptyState';
+import { supabase } from '../../lib/supabaseClient';
+import type { Category } from '../../types';
+import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import AddCategoryModal from './AddCategoryModal';
 import EditCategoryModal from './EditCategoryModal';
-import ConfirmationModal from '../../components/ConfirmationModal';
-import { showErrorToast, showSuccessToast } from '../../utils/toast';
-import { FaPlus, FaPencilAlt, FaTrash } from 'react-icons/fa';
-
-// Define the type for a category object
-export interface Category {
-  id: string;
-  name: string;
-  code: string;
-  description: string;
-}
 
 const CategoriesPage: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -26,96 +26,103 @@ const CategoriesPage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase.from('categories').select('*');
-
-      if (error) {
-        showErrorToast(error.message);
-      } else {
+      try {
+        const { data, error } = await supabase.from('categories').select('*');
+        if (error) throw error;
         setCategories(data as Category[]);
+      } catch (error: any) {
+        showErrorToast(error.message || 'Failed to fetch categories.');
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
-
     fetchCategories();
   }, []);
 
-  const handleAddCategory = async (category: Omit<Category, 'id'>) => {
-    const { data, error } = await supabase
-      .from('categories')
-      .insert([category])
-      .select();
-
-    if (error) {
-      showErrorToast(error.message);
-    } else if (data) {
-      setCategories([...categories, data[0]]);
+  const handleAddCategory = async (
+    category: Omit<Category, 'id' | 'created_at'>
+  ) => {
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .insert([category])
+        .select()
+        .single();
+      if (error) throw error;
+      setCategories([...categories, data as Category]);
       showSuccessToast('Category added successfully!');
       setIsAddModalOpen(false);
+    } catch (error: any) {
+      showErrorToast(error.message || 'Failed to add category.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleUpdateCategory = async (updatedCategory: Category) => {
-    const { data, error } = await supabase
-      .from('categories')
-      .update(updatedCategory)
-      .eq('id', updatedCategory.id)
-      .select();
-
-    if (error) {
-      showErrorToast(error.message);
-    } else if (data) {
-      setCategories(categories.map((c) => (c.id === updatedCategory.id ? data[0] : c)));
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .update(updatedCategory)
+        .eq('id', updatedCategory.id)
+        .select()
+        .single();
+      if (error) throw error;
+      setCategories(
+        categories.map((c) => (c.id === updatedCategory.id ? (data as Category) : c))
+      );
       showSuccessToast('Category updated successfully!');
       setIsEditModalOpen(false);
       setSelectedCategory(null);
+    } catch (error: any) {
+      showErrorToast(error.message || 'Failed to update category.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDeleteCategory = async () => {
     if (!selectedCategory) return;
-
-    const { error } = await supabase
-      .from('categories')
-      .delete()
-      .eq('id', selectedCategory.id);
-
-    if (error) {
-      showErrorToast(error.message);
-    } else {
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('categories')
+        .delete()
+        .eq('id', selectedCategory.id);
+      if (error) throw error;
       setCategories(categories.filter((c) => c.id !== selectedCategory.id));
       showSuccessToast('Category deleted successfully!');
       setIsDeleteModalOpen(false);
       setSelectedCategory(null);
+    } catch (error: any) {
+      showErrorToast(error.message || 'Failed to delete category.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const columns = [
-    { header: 'Name', accessor: 'name' },
-    { header: 'Code', accessor: 'code' },
-    { header: 'Description', accessor: 'description' },
-  ];
-
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <Spinner />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-mine-shaft">Categories Management</h1>
-        <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
-          <FaPlus className="mr-2" />
+    <Stack>
+      <Group justify="space-between">
+        <Title order={2}>Categories Management</Title>
+        <Button
+          leftSection={<IconPlus size={16} />}
+          onClick={() => setIsAddModalOpen(true)}
+        >
           Add Category
         </Button>
-      </div>
+      </Group>
 
       {categories.length === 0 ? (
         <EmptyState
@@ -125,35 +132,51 @@ const CategoriesPage: React.FC = () => {
           onActionClick={() => setIsAddModalOpen(true)}
         />
       ) : (
-        <Table
-          columns={columns}
-          data={categories}
-          renderActions={(category) => (
-            <div className="flex space-x-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setSelectedCategory(category);
-                  setIsEditModalOpen(true);
-                }}
-                className="flex items-center"
-              >
-                <FaPencilAlt />
-              </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => {
-                  setSelectedCategory(category);
-                  setIsDeleteModalOpen(true);
-                }}
-                className="flex items-center"
-              >
-                <FaTrash />
-              </Button>
-            </div>
-          )}
+        <DataTable
+          withTableBorder
+          borderRadius="sm"
+          withColumnBorders
+          striped
+          highlightOnHover
+          records={categories}
+          columns={[
+            { accessor: 'name', title: 'Name', sortable: true },
+            { accessor: 'code', title: 'Code', sortable: true },
+            { accessor: 'description', title: 'Description', sortable: true },
+            {
+              accessor: 'actions',
+              title: 'Actions',
+              textAlign: 'right',
+              render: (category: Category) => (
+                <Group gap="xs" justify="flex-end">
+                  <Tooltip label="Edit Category">
+                    <ActionIcon
+                      variant="subtle"
+                      color="blue"
+                      onClick={() => {
+                        setSelectedCategory(category);
+                        setIsEditModalOpen(true);
+                      }}
+                    >
+                      <IconPencil size={16} />
+                    </ActionIcon>
+                  </Tooltip>
+                  <Tooltip label="Delete Category">
+                    <ActionIcon
+                      variant="subtle"
+                      color="red"
+                      onClick={() => {
+                        setSelectedCategory(category);
+                        setIsDeleteModalOpen(true);
+                      }}
+                    >
+                      <IconTrash size={16} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Group>
+              ),
+            },
+          ]}
         />
       )}
 
@@ -161,6 +184,7 @@ const CategoriesPage: React.FC = () => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAddCategory={handleAddCategory}
+        isLoading={isSubmitting}
       />
 
       <EditCategoryModal
@@ -168,6 +192,7 @@ const CategoriesPage: React.FC = () => {
         onClose={() => setIsEditModalOpen(false)}
         onUpdateCategory={handleUpdateCategory}
         category={selectedCategory}
+        isLoading={isSubmitting}
       />
 
       {selectedCategory && (
@@ -176,10 +201,10 @@ const CategoriesPage: React.FC = () => {
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={handleDeleteCategory}
           title="Delete Category"
-          message={`Are you sure you want to delete the category "${selectedCategory.name}"? This action cannot be undone.`}
+          message={`Are you sure you want to delete "${selectedCategory.name}"? This action cannot be undone.`}
         />
       )}
-    </div>
+    </Stack>
   );
 };
 

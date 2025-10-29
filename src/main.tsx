@@ -1,81 +1,45 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import { MantineProvider } from '@mantine/core'
-import { Notifications } from '@mantine/notifications';
-import '@mantine/core/styles.css'
-import '@mantine/notifications/styles.css';
-import './index.css'
-import App from './App.tsx'
-import { AuthProvider } from './hooks/useAuth'
+// src/main.tsx
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
+import 'mantine-datatable/styles.css';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+import { AuthProvider } from './hooks/useAuth';
+import './index.css';
+import { MantineProvider, createTheme } from '@mantine/core';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <MantineProvider
-        theme={{
-          spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
-          defaultRadius: "md",
-          primaryColor: 'blue',
-          fontFamily: 'Inter, sans-serif',
-          colors: {
-            blue: [
-              '#e7f5ff',
-              '#d0ebff',
-              '#a5d8ff',
-              '#74c0fc',
-              '#4dabf7',
-              '#339af0',
-              '#2B6CB0', // Primary Color
-              '#1c7ed6',
-              '#1971c2',
-              '#1864ab',
-            ],
-            teal: [
-              '#e6fcf5',
-              '#c3fae8',
-              '#96f2d7',
-              '#63e6be',
-              '#38B2AC', // Secondary Color
-              '#20c997',
-              '#12b886',
-              '#0ca678',
-              '#099268',
-              '#087f5b',
-            ],
-            amber: [
-              '#fff8e1',
-              '#ffecb3',
-              '#ffe082',
-              '#ffd54f',
-              '#ffca28',
-              '#F6AD55', // Accent Color
-              '#ffb300',
-              '#ffa000',
-              '#ff8f00',
-              '#ff6f00',
-            ],
-          },
-          other: {
-            backgroundColor: '#F8FAFC',
-            textColor: '#1A202C',
-          },
-          components: {
-            Button: {
-              defaultProps: {
-                size: 'md',
-              },
-            },
-          },
-        }}
-        withGlobalStyles
-        withNormalizeCSS
-      >
-        <Notifications />
+const theme = createTheme({
+  primaryColor: 'indigo',
+  fontFamily: 'Inter, sans-serif',
+  spacing: {
+    xs: '8px',
+    sm: '12px',
+    md: '16px',
+    lg: '24px',
+    xl: '32px',
+  },
+  radius: {
+    xs: '2px',
+    sm: '4px',
+    md: '8px',
+    lg: '16px',
+    xl: '32px',
+  },
+  headings: {
+    fontFamily: 'Inter, sans-serif',
+  },
+});
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <MantineProvider theme={theme}>
+      <BrowserRouter>
         <AuthProvider>
           <App />
         </AuthProvider>
-      </MantineProvider>
-    </BrowserRouter>
-  </StrictMode>,
-)
+      </BrowserRouter>
+    </MantineProvider>
+  </React.StrictMode>
+);

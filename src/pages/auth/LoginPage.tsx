@@ -8,7 +8,6 @@ import {
   Paper,
   PasswordInput,
   Stack,
-  Text,
   TextInput,
   Title,
 } from '@mantine/core';
@@ -71,11 +70,7 @@ export default function LoginPage() {
               required
               label="Email"
               placeholder="superadmin@example.com"
-              value={form.values.email}
-              onChange={(event) =>
-                form.setFieldValue('email', event.currentTarget.value)
-              }
-              error={form.errors.email}
+              {...form.getInputProps('email')}
               radius="md"
             />
 
@@ -83,17 +78,12 @@ export default function LoginPage() {
               required
               label="Password"
               placeholder="Your password"
-              value={form.values.password}
-              onChange={(event) =>
-                form.setFieldValue('password', event.currentTarget.value)
-              }
-              error={form.errors.password}
+              {...form.getInputProps('password')}
               radius="md"
             />
           </Stack>
 
           <Group justify="space-between" mt="lg">
-            {/* Additional links can go here if needed */}
             <Anchor component={Link} to="#" size="sm">
               Forgot password?
             </Anchor>

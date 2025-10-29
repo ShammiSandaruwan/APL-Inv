@@ -1,60 +1,74 @@
 // src/pages/users/EditUserModal.tsx
-import React, { useEffect, useState } from 'react';
-import Modal from '../../components/Modal';
-import Button from '../../components/Button';
-import type { UserProfile } from './UserManagementPage';
+import { Button, Group, Modal, Select, Stack } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import React, { useEffect } from 'react';
+import type { UserProfile } from '../../types';
 
 interface EditUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpdateUser: (user: UserProfile) => void;
   user: UserProfile | null;
+  isLoading: boolean;
 }
 
-const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, onUpdateUser, user }) => {
-  const [role, setRole] = useState('');
+const EditUserModal: React.FC<EditUserModalProps> = ({
+  isOpen,
+  onClose,
+  onUpdateUser,
+  user,
+  isLoading,
+}) => {
+  const form = useForm<{ role: UserProfile['role'] }>({
+    initialValues: {
+      role: 'user', // Default to 'user' to avoid empty initial state
+    },
+    validate: {
+      role: (value) => (value ? null : 'A role must be selected'),
+    },
+  });
 
   useEffect(() => {
     if (user) {
-      setRole(user.role);
+      form.setValues({ role: user.role });
     }
   }, [user]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (values: { role: UserProfile['role'] }) => {
     if (user) {
-      onUpdateUser({ ...user, role });
+      onUpdateUser({ ...user, role: values.role });
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit User Role">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="role" className="block text-sm font-medium text-mine-shaft">
-            Role
-          </label>
-          <select
-            id="role"
-            name="role"
+    <Modal opened={isOpen} onClose={onClose} title="Edit User Role" centered>
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        <Stack gap="md">
+          <Select
+            label="Role"
+            placeholder="Select a role"
             required
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 bg-white border border-silver-chalice rounded-md text-sm shadow-sm placeholder-scorpion focus:outline-none focus:ring-bay-leaf focus:border-bay-leaf"
-          >
-            <option value="super_admin">Super Admin</option>
-            <option value="co_admin">Co-Admin</option>
-            <option value="user">User</option>
-          </select>
-        </div>
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="submit">
-            Save Changes
-          </Button>
-        </div>
+            data={[
+              { value: 'super_admin', label: 'Super Admin' },
+              { value: 'co_admin', label: 'Co-Admin' },
+              { value: 'user', label: 'User' },
+            ]}
+            {...form.getInputProps('role')}
+          />
+          <Group justify="flex-end" mt="md">
+            <Button
+              variant="outline"
+              color="gray"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" loading={isLoading}>
+              Save Changes
+            </Button>
+          </Group>
+        </Stack>
       </form>
     </Modal>
   );

@@ -1,7 +1,6 @@
 // src/components/ConfirmationModal.tsx
+import { Button, Group, Modal, Text } from '@mantine/core';
 import React from 'react';
-import Modal from './Modal';
-import Button from './Button';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -11,18 +10,24 @@ interface ConfirmationModalProps {
   message: string;
 }
 
-const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, onConfirm, title, message }) => {
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+}) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <p>{message}</p>
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="secondary" onClick={onClose}>
+    <Modal opened={isOpen} onClose={onClose} title={title} centered>
+      <Text>{message}</Text>
+      <Group justify="flex-end" mt="md">
+        <Button variant="outline" color="gray" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="button" variant="danger" onClick={onConfirm}>
+        <Button variant="filled" color="red" onClick={onConfirm}>
           Confirm
         </Button>
-      </div>
+      </Group>
     </Modal>
   );
 };

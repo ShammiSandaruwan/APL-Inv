@@ -1,19 +1,34 @@
-// src/pag../../types.tsx
+// src/pages/estates/EstatesPage.tsx
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Group,
+  Loader,
+  Select,
+  Stack,
+  TextInput,
+  Title,
+  Tooltip,
+} from '@mantine/core';
+import {
+  IconEye,
+  IconPencil,
+  IconPlus,
+  IconSearch,
+  IconTrash,
+} from '@tabler/icons-react';
+import { DataTable } from 'mantine-datatable';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabaseClient';
-import Spinner from '../../components/Spinner';
-import Button from '../../components/Button';
-import AddEstateModal from './AddEstateModal';
-import EditEstateModal from './EditEstateModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import EmptyState from '../../components/EmptyState';
-import Table from '../../components/Table';
-import Input from '../../components/Input';
-import { showErrorToast, showSuccessToast } from '../../utils/toast';
-import { FaPlus, FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
-import type { Estate } from '../../types';
 import { useAuth } from '../../hooks/useAuth';
+import { supabase } from '../../lib/supabaseClient';
+import type { Estate } from '../../types';
+import { showErrorToast, showSuccessToast } from '../../utils/toast';
+import AddEstateModal from './AddEstateModal';
+import EditEstateModal from './EditEstateModal';
 
 const EstatesPage: React.FC = () => {
   const [estates, setEstates] = useState<Estate[]>([]);
@@ -23,52 +38,41 @@ const EstatesPage: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedEstate, setSelectedEstate] = useState<Estate | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
-  const [sortBy, setSortBy] = useState('name');
+  const [locationFilter, setLocationFilter] = useState<string | null>(null);
   const navigate = useNavigate();
   const { profile, permissions } = useAuth();
 
-  const canManage = profile?.role === 'super_admin' || (profile?.role === 'co_admin' && permissions?.can_manage_estates);
+  const canManage =
+    profile?.role === 'super_admin' ||
+    (profile?.role === 'co_admin' && permissions?.can_manage_estates);
 
   useEffect(() => {
     const fetchEstates = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase.from('estates').select('*');
-
-      if (error) {
-        showErrorToast(error.message);
-      } else {
+      try {
+        const { data, error } = await supabase.from('estates').select('*');
+        if (error) throw error;
         setEstates(data as Estate[]);
+      } catch (error: any) {
+        showErrorToast(error.message || 'Failed to fetch estates.');
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
-
     fetchEstates();
   }, []);
 
-  const handleAddEstate = async (estate: { name: string; code: string; location: string; description?: string }) => {
-    const { data, error } = await supabase
-      .from('estates')
-      .insert([estate])
-      .select();
-
-    if (error) {
-      showErrorToast(error.message);
-    } else if (data) {
-      setEstates([...estates, data[0]]);
-      showSuccessToast('Estate added successfully!');
-      setIsAddModalOpen(false);
-    }
+  const handleAddEstate = (newEstate: Estate) => {
+    setEstates([...estates, newEstate]);
+    setIsAddModalOpen(false);
   };
 
   const handleDeleteEstate = async () => {
     if (!selectedEstate) return;
-
     const { error } = await supabase
       .from('estates')
       .delete()
       .eq('id', selectedEstate.id);
-
     if (error) {
       showErrorToast(error.message);
     } else {
@@ -79,168 +83,161 @@ const EstatesPage: React.FC = () => {
     }
   };
 
-  const handleUpdateEstate = async (updatedEstate: Estate) => {
-    const { data, error } = await supabase
-      .from('estates')
-      .update(updatedEstate)
-      .eq('id', updatedEstate.id)
-      .select();
-
-    if (error) {
-      showErrorToast(error.message);
-    } else if (data) {
-      setEstates(estates.map((e) => (e.id === updatedEstate.id ? data[0] : e)));
-      showSuccessToast('Estate updated successfully!');
-      setIsEditModalOpen(false);
-      setSelectedEstate(null);
-    }
+  const handleUpdateEstate = (updatedEstate: Estate) => {
+    setEstates(
+      estates.map((e) => (e.id === updatedEstate.id ? updatedEstate : e))
+    );
+    setIsEditModalOpen(false);
+    setSelectedEstate(null);
   };
 
-  const columns = [
-    { header: 'Name', accessor: 'name' },
-    { header: 'Code', accessor: 'code' },
-    { header: 'Location', accessor: 'location' },
-  ];
-
-  const filteredAndSortedEstates = useMemo(() => {
-    return estates
-      .filter(estate =>
+  const filteredEstates = useMemo(() => {
+    return estates.filter(
+      (estate) =>
         estate.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (locationFilter === '' || estate.location === locationFilter)
-      )
-      .sort((a, b) => {
-        if (sortBy === 'name') {
-          return a.name.localeCompare(b.name);
-        } else if (sortBy === 'date') {
-          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-        }
-        return 0;
-      });
-  }, [estates, searchTerm, locationFilter, sortBy]);
+        (!locationFilter || estate.location === locationFilter)
+    );
+  }, [estates, searchTerm, locationFilter]);
 
-  const uniqueLocations = [...new Set(estates.map(e => e.location))];
+  const uniqueLocations = [...new Set(estates.map((e) => e.location))];
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <Spinner />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-mine-shaft">Estates Management</h1>
+    <Stack>
+      <Group justify="space-between">
+        <Title order={2}>Estates Management</Title>
         {canManage && (
-          <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
-            <FaPlus className="mr-2" />
+          <Button
+            leftSection={<IconPlus size={16} />}
+            onClick={() => setIsAddModalOpen(true)}
+          >
             Add Estate
           </Button>
         )}
-      </div>
+      </Group>
 
-      <div className="mb-4 flex space-x-4">
-        <Input
+      <Group grow>
+        <TextInput
           placeholder="Search by name..."
+          leftSection={<IconSearch size={16} />}
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(event) => setSearchTerm(event.currentTarget.value)}
         />
-        <select
+        <Select
+          placeholder="Filter by location"
+          data={uniqueLocations.map((loc) => ({ value: loc, label: loc }))}
           value={locationFilter}
-          onChange={(e) => setLocationFilter(e.target.value)}
-          className="mt-1 block w-full px-3 py-2 bg-white border border-silver-chalice rounded-md text-sm shadow-sm placeholder-scorpion focus:outline-none focus:ring-bay-leaf focus:border-bay-leaf"
-        >
-          <option value="">All Locations</option>
-          {uniqueLocations.map(location => (
-            <option key={location} value={location}>{location}</option>
-          ))}
-        </select>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="mt-1 block w-full px-3 py-2 bg-white border border-silver-chalice rounded-md text-sm shadow-sm placeholder-scorpion focus:outline-none focus:ring-bay-leaf focus:border-bay-leaf"
-        >
-          <option value="name">Sort by Name</option>
-          <option value="date">Sort by Date</option>
-        </select>
-      </div>
+          onChange={setLocationFilter}
+          clearable
+        />
+      </Group>
 
-      {filteredAndSortedEstates.length === 0 ? (
+      {filteredEstates.length === 0 ? (
         <EmptyState
           title="No Estates Found"
           message="Get started by adding your first estate to the system."
-          actionText="Add Your First Estate"
-          onActionClick={() => setIsAddModalOpen(true)}
+          actionText={canManage ? 'Add Your First Estate' : undefined}
+          onActionClick={canManage ? () => setIsAddModalOpen(true) : undefined}
         />
       ) : (
-        <Table
-          columns={columns}
-          data={filteredAndSortedEstates}
-          renderActions={(estate) => (
-            <div className="flex space-x-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => navigate(`/estates/${estate.id}`)}
-                className="flex items-center"
-              >
-                <FaEye />
-              </Button>
-              {canManage && (
-                <>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedEstate(estate);
-                      setIsEditModalOpen(true);
-                    }}
-                    className="flex items-center"
-                  >
-                    <FaPencilAlt />
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedEstate(estate);
-                      setIsDeleteModalOpen(true);
-                    }}
-                    className="flex items-center"
-                  >
-                    <FaTrash />
-                  </Button>
-                </>
-              )}
-            </div>
+        <DataTable
+          withTableBorder
+          borderRadius="sm"
+          withColumnBorders
+          striped
+          highlightOnHover
+          records={filteredEstates}
+          columns={[
+            { accessor: 'name', title: 'Name', sortable: true },
+            { accessor: 'code', title: 'Code', sortable: true },
+            { accessor: 'location', title: 'Location', sortable: true },
+            {
+              accessor: 'is_active',
+              title: 'Status',
+              render: ({ is_active }: Estate) => (
+                <Badge color={is_active ? 'green' : 'gray'}>
+                  {is_active ? 'Active' : 'Inactive'}
+                </Badge>
+              ),
+              sortable: true
+            },
+            {
+              accessor: 'actions',
+              title: 'Actions',
+              textAlign: 'right',
+              render: (estate: Estate) => (
+                <Group gap="xs" justify="flex-end">
+                  <Tooltip label="View Details">
+                    <ActionIcon
+                      variant="subtle"
+                      onClick={() => navigate(`/estates/${estate.id}`)}
+                    >
+                      <IconEye size={16} />
+                    </ActionIcon>
+                  </Tooltip>
+                  {canManage && (
+                    <>
+                      <Tooltip label="Edit Estate">
+                        <ActionIcon
+                          variant="subtle"
+                          color="blue"
+                          onClick={() => {
+                            setSelectedEstate(estate);
+                            setIsEditModalOpen(true);
+                          }}
+                        >
+                          <IconPencil size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+                      <Tooltip label="Delete Estate">
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
+                          onClick={() => {
+                            setSelectedEstate(estate);
+                            setIsDeleteModalOpen(true);
+                          }}
+                        >
+                          <IconTrash size={16} />
+                        </ActionIcon>
+                      </Tooltip>
+                    </>
+                  )}
+                </Group>
+              ),
+            },
+          ]}
+        />
+      )}
+
+      {canManage && (
+        <>
+          <AddEstateModal
+            isOpen={isAddModalOpen}
+            onClose={() => setIsAddModalOpen(false)}
+            onAddEstate={handleAddEstate}
+          />
+          <EditEstateModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            onUpdateEstate={handleUpdateEstate}
+            estate={selectedEstate}
+          />
+          {selectedEstate && (
+            <ConfirmationModal
+              isOpen={isDeleteModalOpen}
+              onClose={() => setIsDeleteModalOpen(false)}
+              onConfirm={handleDeleteEstate}
+              title="Delete Estate"
+              message={`Are you sure you want to delete "${selectedEstate.name}"? This action cannot be undone.`}
+            />
           )}
-        />
+        </>
       )}
-
-      <AddEstateModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAddEstate={handleAddEstate}
-      />
-
-      <EditEstateModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onUpdateEstate={handleUpdateEstate}
-        estate={selectedEstate}
-      />
-
-      {selectedEstate && (
-        <ConfirmationModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handleDeleteEstate}
-          title="Delete Estate"
-          message={`Are you sure you want to delete the estate "${selectedEstate.name}"? This action cannot be undone.`}
-        />
-      )}
-    </div>
+    </Stack>
   );
 };
 
