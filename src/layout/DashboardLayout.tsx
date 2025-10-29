@@ -91,6 +91,7 @@ const DashboardLayout: React.FC = () => {
           </div>
         </div>
       </aside>
+      </Hidden>
 
       {/* Main Content */}
       <div style={{ flex: '1', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'margin-left 300ms ease-in-out', marginLeft: isCollapsed ? '6rem' : '18rem' }}>
