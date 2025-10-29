@@ -1,10 +1,22 @@
 // src/layout/Header.tsx
 import React from 'react';
+import { Burger } from '@mantine/core';
 import { FaSearch, FaBell } from 'react-icons/fa';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  isCollapsed: boolean;
+  setIsCollapsed: (isCollapsed: boolean) => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ isCollapsed, setIsCollapsed }) => {
   return (
     <header className="bg-card border-b border-border p-6 flex items-center justify-between">
+      <Burger
+        opened={isCollapsed}
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        size="sm"
+        hiddenFrom="sm"
+      />
       {/* Search Bar */}
       <div className="flex-1 max-w-xl">
         <div className="relative">
