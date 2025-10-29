@@ -27,11 +27,10 @@ export default function LoginPage() {
       password: '',
     },
     validate: {
-      email: (val) => (/^\\S+@\\S+$/.test(val) ? null : 'Invalid email'),
-      password: (val) =>
-        val.length <= 6
-          ? 'Password should include at least 6 characters'
-          : null,
+      email: (value) =>
+        /^\S+@\S+\.\S+$/.test(value.trim()) ? null : 'Invalid email address',
+      password: (value) =>
+        value.length >= 6 ? null : 'Password must be at least 6 characters',
     },
   });
 
