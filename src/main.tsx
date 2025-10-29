@@ -15,8 +15,6 @@ createRoot(document.getElementById('root')!).render(
       <MantineProvider
         theme={{
           primaryColor: 'blue',
-          secondaryColor: 'teal',
-          accentColor: 'amber',
           fontFamily: 'Inter, sans-serif',
           defaultRadius: 'md',
           colors: {
