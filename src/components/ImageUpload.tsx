@@ -1,20 +1,33 @@
 // src/components/ImageUpload.tsx
+import {
+  Button,
+  FileButton,
+  Grid,
+  Group,
+  Image,
+  Loader,
+  Paper,
+  Text,
+  ThemeIcon,
+} from '@mantine/core';
+import { IconTrash, IconUpload } from '@tabler/icons-react';
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { showErrorToast, showSuccessToast } from '../utils/toast';
-import { IconUpload, IconTrash } from '@tabler/icons-react';
 
 interface ImageUploadProps {
   onPhotoChange: (urls: string[]) => void;
   initialUrls?: string[];
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ onPhotoChange, initialUrls = [] }) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({
+  onPhotoChange,
+  initialUrls = [],
+}) => {
   const [imageUrls, setImageUrls] = useState<string[]>(initialUrls);
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+  const handleFileChange = async (files: File[]) => {
     if (!files || files.length === 0) return;
 
     setIsUploading(true);
@@ -22,17 +35,21 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onPhotoChange, initialUrls = 
 
     for (const file of files) {
       const fileName = `${Date.now()}_${file.name}`;
-      const { data, error } = await supabase.storage
-        .from('item-photos')
-        .upload(fileName, file);
+      try {
+        const { data, error } = await supabase.storage
+          .from('item-photos')
+          .upload(fileName, file);
 
-      if (error) {
-        showErrorToast(`Failed to upload ${file.name}: ${error.message}`);
-      } else if (data) {
-        const { data: { publicUrl } } = supabase.storage.from('item-photos').getPublicUrl(data.path);
+        if (error) throw error;
+
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from('item-photos').getPublicUrl(data.path);
         if (publicUrl) {
           uploadedUrls.push(publicUrl);
         }
+      } catch (error: any) {
+        showErrorToast(`Failed to upload ${file.name}: ${error.message}`);
       }
     }
 
@@ -40,49 +57,58 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onPhotoChange, initialUrls = 
     setImageUrls(newUrls);
     onPhotoChange(newUrls);
     setIsUploading(false);
-    showSuccessToast('Images uploaded successfully!');
+    if (uploadedUrls.length > 0) {
+      showSuccessToast('Images uploaded successfully!');
+    }
   };
 
   const handleRemoveImage = (urlToRemove: string) => {
-    const newUrls = imageUrls.filter(url => url !== urlToRemove);
+    const newUrls = imageUrls.filter((url) => url !== urlToRemove);
     setImageUrls(newUrls);
     onPhotoChange(newUrls);
   };
 
   return (
     <div>
-      <label className="block text-sm font-medium text-mine-shaft">Photos</label>
-      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-silver-chalice border-dashed rounded-md">
-        <div className="space-y-1 text-center">
-          <IconUpload className="mx-auto h-12 w-12 text-silver-chalice" />
-          <div className="flex text-sm text-scorpion">
-            <label
-              htmlFor="file-upload"
-              className="relative cursor-pointer bg-white rounded-md font-medium text-salem hover:text-goblin focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-bay-leaf"
-            >
-              <span>Upload files</span>
-              <input id="file-upload" name="file-upload" type="file" multiple className="sr-only" onChange={handleFileChange} disabled={isUploading} />
-            </label>
-            <p className="pl-1">or drag and drop</p>
-          </div>
-          <p className="text-xs text-scorpion">PNG, JPG, GIF up to 10MB</p>
-        </div>
-      </div>
-      {isUploading && <p className="text-sm text-scorpion mt-2">Uploading...</p>}
-      <div className="mt-4 grid grid-cols-4 gap-2">
-        {imageUrls.map((url) => (
-          <div key={url} className="relative w-24 h-24">
-            <img src={url} alt="Uploaded" className="w-full h-full object-cover rounded-lg" />
-            <button
-              type="button"
-              onClick={() => handleRemoveImage(url)}
-              className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 text-xs hover:bg-red-700 transition-colors"
-            >
-              <IconTrash />
-            </button>
-          </div>
-        ))}
-      </div>
+      <Text size="sm" fw={500}>
+        Photos
+      </Text>
+      <Paper withBorder p="md" radius="md" mt="xs">
+        <Group>
+          <FileButton onChange={handleFileChange} accept="image/*" multiple>
+            {(props) => (
+              <Button {...props} leftSection={<IconUpload size={16} />}>
+                Upload images
+              </Button>
+            )}
+          </FileButton>
+          {isUploading && <Loader size="sm" />}
+        </Group>
+
+        <Grid mt="md">
+          {imageUrls.map((url) => (
+            <Grid.Col span={4} key={url}>
+              <Paper withBorder radius="md" style={{ position: 'relative' }}>
+                <Image src={url} height={100} alt="Uploaded" />
+                <ThemeIcon
+                  color="red"
+                  variant="filled"
+                  onClick={() => handleRemoveImage(url)}
+                  style={{
+                    position: 'absolute',
+                    top: -8,
+                    right: -8,
+                    cursor: 'pointer',
+                  }}
+                  size="sm"
+                >
+                  <IconTrash size={12} />
+                </ThemeIcon>
+              </Paper>
+            </Grid.Col>
+          ))}
+        </Grid>
+      </Paper>
     </div>
   );
 };

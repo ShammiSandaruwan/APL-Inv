@@ -1,63 +1,87 @@
 // src/pages/categories/AddCategoryModal.tsx
-import React, { useState } from 'react';
-import Modal from '../../components/Modal';
-import Input from '../../components/Input';
-import Button from '../../components/Button';
-import type { Category } from './CategoriesPage';
+import {
+  Button,
+  Group,
+  Modal,
+  Stack,
+  Textarea,
+  TextInput,
+} from '@mantine/core';
+import { useForm } from '@mantine/form';
+import React from 'react';
+import type { Category } from '../../types';
 
 interface AddCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddCategory: (category: Omit<Category, 'id'>) => void;
+  onAddCategory: (category: Omit<Category, 'id' | 'created_at'>) => void;
+  isLoading: boolean;
 }
 
-const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ isOpen, onClose, onAddCategory }) => {
-  const [name, setName] = useState('');
-  const [code, setCode] = useState('');
-  const [description, setDescription] = useState('');
+const AddCategoryModal: React.FC<AddCategoryModalProps> = ({
+  isOpen,
+  onClose,
+  onAddCategory,
+  isLoading,
+}) => {
+  const form = useForm<Omit<Category, 'id' | 'created_at'>>({
+    initialValues: {
+      name: '',
+      code: '',
+      description: '',
+    },
+    validate: {
+      name: (value) => (value.trim().length > 0 ? null : 'Category name is required'),
+      code: (value) => (value.trim().length > 0 ? null : 'Category code is required'),
+    },
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onAddCategory({ name, code, description });
+  // Reset form when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      form.reset();
+    }
+  }, [isOpen]);
+
+  const handleSubmit = (values: Omit<Category, 'id' | 'created_at'>) => {
+    onAddCategory(values);
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add New Category">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Category Name"
-          id="name"
-          name="name"
-          type="text"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <Input
-          label="Category Code"
-          id="code"
-          name="code"
-          type="text"
-          required
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-        />
-        <Input
-          label="Description"
-          id="description"
-          name="description"
-          type="text"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="submit">
-            Save Category
-          </Button>
-        </div>
+    <Modal opened={isOpen} onClose={onClose} title="Add New Category" centered>
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        <Stack gap="md">
+          <TextInput
+            required
+            label="Category Name"
+            placeholder="e.g., Furniture"
+            {...form.getInputProps('name')}
+          />
+          <TextInput
+            required
+            label="Category Code"
+            placeholder="e.g., FURN-001"
+            {...form.getInputProps('code')}
+          />
+          <Textarea
+            label="Description"
+            placeholder="Optional description"
+            {...form.getInputProps('description')}
+          />
+          <Group justify="flex-end" mt="md">
+            <Button
+              variant="outline"
+              color="gray"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" loading={isLoading}>
+              Save Category
+            </Button>
+          </Group>
+        </Stack>
       </form>
     </Modal>
   );

@@ -15,10 +15,9 @@ interface TableProps {
 const Table: React.FC<TableProps> = ({ columns, data, renderActions }) => {
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden shadow-card">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-border">
-          <thead className="bg-background">
-            <tr>
+      <table className="min-w-full divide-y divide-border">
+        <thead className="bg-background">
+          <tr>
             {columns.map((col) => (
               <th
                 key={col.accessor}
@@ -52,7 +51,6 @@ const Table: React.FC<TableProps> = ({ columns, data, renderActions }) => {
           ))}
         </tbody>
       </table>
-      </div>
     </div>
   );
 };

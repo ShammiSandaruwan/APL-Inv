@@ -1,97 +1,100 @@
 // src/pages/items/ItemsPage.tsx
+import {
+  ActionIcon,
+  Button,
+  Group,
+  Loader,
+  Select,
+  Stack,
+  TextInput,
+  Title,
+  Tooltip,
+} from '@mantine/core';
+import {
+  IconEye,
+  IconPencil,
+  IconPlus,
+  IconSearch,
+  IconTrash,
+} from '@tabler/icons-react';
+import { DataTable } from 'mantine-datatable';
 import React, { useEffect, useMemo, useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
-import Spinner from '../../components/Spinner';
-import Button from '../../components/Button';
-import AddItemModal from './AddItemModal';
-import EditItemModal from './EditItemModal';
+import { useNavigate } from 'react-router-dom';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import EmptyState from '../../components/EmptyState';
-import Table from '../../components/Table';
-import Input from '../../components/Input';
-import { showErrorToast, showSuccessToast } from '../../utils/toast';
-import { FaPlus, FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
-import type { Item } from '../../types';
 import { useAuth } from '../../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../lib/supabaseClient';
+import type { Building, Estate, Item } from '../../types';
+import { showErrorToast, showSuccessToast } from '../../utils/toast';
+import AddItemModal from './AddItemModal';
+import EditItemModal from './EditItemModal';
 
 const ItemsPage: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
+  const [estates, setEstates] = useState<Estate[]>([]);
+  const [buildings, setBuildings] = useState<Building[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [estateFilter, setEstateFilter] = useState('');
-  const [buildingFilter, setBuildingFilter] = useState('');
-  const [sortBy, setSortBy] = useState('name');
+  const [estateFilter, setEstateFilter] = useState<string | null>(null);
+  const [buildingFilter, setBuildingFilter] = useState<string | null>(null);
+  const navigate = useNavigate();
   const { profile, permissions } = useAuth();
 
-  const canCreate = profile?.role === 'super_admin' || profile?.role === 'estate_user' || permissions?.can_create_items;
-  const canEdit = profile?.role === 'super_admin' || profile?.role === 'estate_user' || permissions?.can_edit_items;
-  const canDelete = profile?.role === 'super_admin' || profile?.role === 'estate_user' || permissions?.can_delete_items;
+  const canCreate =
+    profile?.role === 'super_admin' ||
+    profile?.role === 'estate_user' ||
+    permissions?.can_create_items;
+  const canEdit =
+    profile?.role === 'super_admin' ||
+    profile?.role === 'estate_user' ||
+    permissions?.can_edit_items;
+  const canDelete =
+    profile?.role === 'super_admin' ||
+    profile?.role === 'estate_user' ||
+    permissions?.can_delete_items;
 
   useEffect(() => {
-    const fetchItems = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase
-        .from('items')
-        .select('*, buildings(*, estates(*))');
+      try {
+        const { data: itemsData, error: itemsError } = await supabase
+          .from('items')
+          .select('*, buildings(*, estates(*))');
+        if (itemsError) throw itemsError;
+        setItems(itemsData as Item[]);
 
-      if (error) {
-        showErrorToast(error.message);
-      } else {
-        setItems(data as Item[]);
+        const { data: estatesData, error: estatesError } = await supabase
+          .from('estates')
+          .select('*');
+        if (estatesError) throw estatesError;
+        setEstates(estatesData as Estate[]);
+
+        const { data: buildingsData, error: buildingsError } = await supabase
+          .from('buildings')
+          .select('*');
+        if (buildingsError) throw buildingsError;
+        setBuildings(buildingsData as Building[]);
+      } catch (error: any) {
+        showErrorToast(error.message || 'Failed to fetch page data.');
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
-
-    fetchItems();
+    fetchData();
   }, []);
 
-  const handleAddItem = async (item: Omit<Item, 'id' | 'buildings' | 'created_at'>) => {
-    try {
-      // Explicitly check for missing foreign keys which are required by the database
-      if (!item.estate_id || !item.building_id) {
-        throw new Error('An estate and a building must be selected.');
-      }
-
-      const { data, error } = await supabase
-        .from('items')
-        .insert(item)
-        .select('*, buildings(*, estates(*))')
-        .single();
-
-      if (error) {
-        // If Supabase returns an error, it will be thrown and caught here
-        throw error;
-      }
-
-      if (data) {
-        setItems(prevItems => [...prevItems, data as Item]);
-        showSuccessToast('Item added successfully!');
-        setIsAddModalOpen(false);
-      } else {
-        // Handle the unlikely case where Supabase returns neither data nor an error
-        throw new Error('An unknown error occurred during item creation.');
-      }
-    } catch (err: any) {
-      // Centralized error handling for any failure in the try block
-      console.error('Error in handleAddItem:', err);
-      showErrorToast(err.message || 'Failed to add item. Please try again.');
-    }
+  const handleAddItem = (newItem: Item) => {
+    setItems((prevItems) => [...prevItems, newItem]);
+    setIsAddModalOpen(false);
   };
 
   const handleDeleteItem = async () => {
     if (!selectedItem) return;
-
-    const { error } = await supabase
-      .from('items')
-      .delete()
-      .eq('id', selectedItem.id);
-
+    const { error } = await supabase.from('items').delete().eq('id', selectedItem.id);
     if (error) {
       showErrorToast(error.message);
     } else {
@@ -102,206 +105,168 @@ const ItemsPage: React.FC = () => {
     }
   };
 
-  const handleUpdateItem = async (updatedItem: Item) => {
-    const { data, error } = await supabase
-      .from('items')
-      .update({
-        name: updatedItem.name,
-        item_code: updatedItem.item_code,
-        estate_id: updatedItem.estate_id,
-        building_id: updatedItem.building_id,
-        photos: updatedItem.photos,
-      })
-      .eq('id', updatedItem.id)
-      .select('*, buildings(*, estates(*))')
-      .single();
-
-    if (error) {
-      showErrorToast(error.message);
-    } else if (data) {
-      setItems(
-        items.map((i) => (i.id === updatedItem.id ? (data as Item) : i))
-      );
-      showSuccessToast('Item updated successfully!');
-      setIsEditModalOpen(false);
-      setSelectedItem(null);
-    }
+  const handleUpdateItem = (updatedItem: Item) => {
+    setItems(items.map((i) => (i.id === updatedItem.id ? updatedItem : i)));
+    setIsEditModalOpen(false);
+    setSelectedItem(null);
   };
 
-  const columns = [
-    { header: 'Name', accessor: 'name' },
-    { header: 'Code', accessor: 'item_code' },
-    { header: 'Building', accessor: 'buildingName' },
-    { header: 'Estate', accessor: 'estateName' },
-  ];
-
-  const filteredAndSortedItems = useMemo(() => {
-    return items
-      .filter(item =>
+  const filteredItems = useMemo(() => {
+    return items.filter(
+      (item) =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (estateFilter === '' || item.buildings?.estates?.id === estateFilter) &&
-        (buildingFilter === '' || item.building_id === buildingFilter)
-      )
-      .sort((a, b) => {
-        if (sortBy === 'name') {
-          return a.name.localeCompare(b.name);
-        } else if (sortBy === 'date') {
-          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-        }
-        return 0;
-      });
-  }, [items, searchTerm, estateFilter, buildingFilter, sortBy]);
-
-  const uniqueEstates = [...new Map(items.map(i => [i.buildings?.estates?.id, i.buildings?.estates])).values()];
-  const uniqueBuildings = [...new Map(items.map(i => [i.buildings?.id, i.buildings])).values()];
-
-  const tableData = filteredAndSortedItems.map(i => ({
-    ...i,
-    buildingName: i.buildings?.name,
-    estateName: i.buildings?.estates?.name,
-  }));
+        (!estateFilter || item.buildings?.estate_id === estateFilter) &&
+        (!buildingFilter || item.building_id === buildingFilter)
+    );
+  }, [items, searchTerm, estateFilter, buildingFilter]);
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <Spinner />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-mine-shaft">Items Management</h1>
+    <Stack>
+      <Group justify="space-between">
+        <Title order={2}>Items Management</Title>
         {canCreate && (
-          <Button onClick={() => setIsAddModalOpen(true)} className="flex items-center">
-            <FaPlus className="mr-2" />
+          <Button
+            leftSection={<IconPlus size={16} />}
+            onClick={() => setIsAddModalOpen(true)}
+          >
             Add Item
           </Button>
         )}
-      </div>
+      </Group>
 
-      <div className="mb-4 flex space-x-4">
-        <Input
+      <Group grow>
+        <TextInput
           placeholder="Search by name..."
+          leftSection={<IconSearch size={16} />}
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(event) => setSearchTerm(event.currentTarget.value)}
         />
-        <select
+        <Select
+          placeholder="Filter by estate"
+          data={estates.map((e) => ({ value: e.id, label: e.name }))}
           value={estateFilter}
-          onChange={(e) => setEstateFilter(e.target.value)}
-          className="mt-1 block w-full px-3 py-2 bg-white border border-silver-chalice rounded-md text-sm shadow-sm placeholder-scorpion focus:outline-none focus:ring-bay-leaf focus:border-bay-leaf"
-        >
-          <option value="">All Estates</option>
-          {uniqueEstates.map(estate => estate && (
-            <option key={estate.id} value={estate.id}>{estate.name}</option>
-          ))}
-        </select>
-        <select
+          onChange={setEstateFilter}
+          clearable
+        />
+        <Select
+          placeholder="Filter by building"
+          data={buildings.map((b) => ({ value: b.id, label: b.name }))}
           value={buildingFilter}
-          onChange={(e) => setBuildingFilter(e.target.value)}
-          className="mt-1 block w-full px-3 py-2 bg-white border border-silver-chalice rounded-md text-sm shadow-sm placeholder-scorpion focus:outline-none focus:ring-bay-leaf focus:border-bay-leaf"
-        >
-          <option value="">All Buildings</option>
-          {uniqueBuildings.map(building => building && (
-            <option key={building.id} value={building.id}>{building.name}</option>
-          ))}
-        </select>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="mt-1 block w-full px-3 py-2 bg-white border border-silver-chalice rounded-md text-sm shadow-sm placeholder-scorpion focus:outline-none focus:ring-bay-leaf focus:border-bay-leaf"
-        >
-          <option value="name">Sort by Name</option>
-          <option value="date">Sort by Date</option>
-        </select>
-      </div>
+          onChange={setBuildingFilter}
+          clearable
+        />
+      </Group>
 
-      {filteredAndSortedItems.length === 0 ? (
+      {filteredItems.length === 0 ? (
         <EmptyState
           title="No Items Found"
           message="Get started by adding your first item to the system."
-          actionText="Add Your First Item"
-          onActionClick={() => setIsAddModalOpen(true)}
+          actionText={canCreate ? 'Add Your First Item' : undefined}
+          onActionClick={canCreate ? () => setIsAddModalOpen(true) : undefined}
         />
       ) : (
-        <Table
-          columns={columns}
-          data={tableData}
-          renderActions={(item) => (
-            <div className="flex space-x-2">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => navigate(`/items/${item.id}`)}
-                className="flex items-center"
-              >
-                <FaEye />
-              </Button>
-              {canEdit && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedItem(item);
-                    setIsEditModalOpen(true);
-                  }}
-                  className="flex items-center"
-                >
-                  <FaPencilAlt />
-                </Button>
-              )}
-              {canDelete && (
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedItem(item);
-                    setIsDeleteModalOpen(true);
-                  }}
-                  className="flex items-center"
-                >
-                  <FaTrash />
-                </Button>
-              )}
-            </div>
-          )}
+        <DataTable
+          withTableBorder
+          borderRadius="sm"
+          withColumnBorders
+          striped
+          highlightOnHover
+          records={filteredItems}
+          columns={[
+            { accessor: 'name', title: 'Name', sortable: true },
+            { accessor: 'item_code', title: 'Code', sortable: true },
+            {
+              accessor: 'buildings.name',
+              title: 'Building',
+              render: ({ buildings }: Item) => buildings?.name || 'N/A',
+              sortable: true,
+            },
+            {
+              accessor: 'buildings.estates.name',
+              title: 'Estate',
+              render: ({ buildings }: Item) => buildings?.estates?.name || 'N/A',
+              sortable: true,
+            },
+            {
+              accessor: 'actions',
+              title: 'Actions',
+              textAlign: 'right',
+              render: (item: Item) => (
+                <Group gap="xs" justify="flex-end">
+                  <Tooltip label="View Details">
+                    <ActionIcon
+                      variant="subtle"
+                      onClick={() => navigate(`/items/${item.id}`)}
+                    >
+                      <IconEye size={16} />
+                    </ActionIcon>
+                  </Tooltip>
+                  {canEdit && (
+                    <Tooltip label="Edit Item">
+                      <ActionIcon
+                        variant="subtle"
+                        color="blue"
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setIsEditModalOpen(true);
+                        }}
+                      >
+                        <IconPencil size={16} />
+                      </ActionIcon>
+                    </Tooltip>
+                  )}
+                  {canDelete && (
+                    <Tooltip label="Delete Item">
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        onClick={() => {
+                          setSelectedItem(item);
+                          setIsDeleteModalOpen(true);
+                        }}
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Tooltip>
+                  )}
+                </Group>
+              ),
+            },
+          ]}
         />
       )}
 
-      <AddItemModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAddItem={handleAddItem}
-      />
+      {canCreate && (
+        <AddItemModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onAddItem={handleAddItem}
+        />
+      )}
 
-      <EditItemModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onUpdateItem={handleUpdateItem}
-        item={selectedItem}
-      />
+      {canEdit && (
+        <EditItemModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onUpdateItem={handleUpdateItem}
+          item={selectedItem}
+        />
+      )}
 
-      {selectedItem && (
+      {canDelete && selectedItem && (
         <ConfirmationModal
           isOpen={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
           onConfirm={handleDeleteItem}
           title="Delete Item"
-          message={`Are you sure you want to delete the item "${selectedItem.name}"? This action cannot be undone.`}
+          message={`Are you sure you want to delete "${selectedItem.name}"? This action cannot be undone.`}
         />
       )}
-
-      {selectedItem && (
-        <ConfirmationModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handleDeleteItem}
-          title="Delete Item"
-          message={`Are you sure you want to delete the item "${selectedItem.name}"? This action cannot be undone.`}
-        />
-      )}
-    </div>
+    </Stack>
   );
 };
 
