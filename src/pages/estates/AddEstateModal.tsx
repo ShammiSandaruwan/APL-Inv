@@ -1,63 +1,64 @@
 // src/pages/estates/AddEstateModal.tsx
 import React from 'react';
-import Modal from '../../components/Modal';
-import Input from '../../components/Input';
-import Button from '../../components/Button';
+import { Modal, TextInput, Button, Group } from '@mantine/core';
+import { useForm } from '@mantine/form';
 import type { Estate } from '../../types';
 
 interface AddEstateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddEstate: (estate: Omit<Estate, 'id' | 'is_active'>) => void;
+  onAddEstate: (estate: Omit<Estate, 'id' | 'is_active' | 'created_at'>) => void;
 }
 
 const AddEstateModal: React.FC<AddEstateModalProps> = ({ isOpen, onClose, onAddEstate }) => {
-  const [name, setName] = React.useState('');
-  const [code, setCode] = React.useState('');
-  const [location, setLocation] = React.useState('');
+  const form = useForm({
+    initialValues: {
+      name: '',
+      code: '',
+      location: '',
+      description: '',
+    },
+    validate: {
+      name: (value) => (value.length > 0 ? null : 'Estate name is required'),
+      code: (value) => (value.length > 0 ? null : 'Estate code is required'),
+    },
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onAddEstate({ name, code, location, description: '' });
+  const handleSubmit = (values: typeof form.values) => {
+    onAddEstate(values);
+    form.reset();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add New Estate">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
+    <Modal opened={isOpen} onClose={onClose} title="Add New Estate">
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        <TextInput
           label="Estate Name"
-          id="name"
-          name="name"
-          type="text"
+          placeholder="Enter estate name"
+          {...form.getInputProps('name')}
           required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
         />
-        <Input
+        <TextInput
           label="Estate Code"
-          id="code"
-          name="code"
-          type="text"
+          placeholder="Enter estate code"
+          {...form.getInputProps('code')}
           required
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
+          mt="md"
         />
-        <Input
+        <TextInput
           label="Location/City"
-          id="location"
-          name="location"
-          type="text"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
+          placeholder="Enter location"
+          {...form.getInputProps('location')}
+          mt="md"
         />
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>
+        <Group justify="right" mt="lg">
+          <Button variant="default" onClick={onClose}>
             Cancel
           </Button>
           <Button type="submit">
             Save Estate
           </Button>
-        </div>
+        </Group>
       </form>
     </Modal>
   );

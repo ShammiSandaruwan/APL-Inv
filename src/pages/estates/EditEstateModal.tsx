@@ -19,6 +19,10 @@ const EditEstateModal: React.FC<EditEstateModalProps> = ({ isOpen, onClose, onUp
       location: '',
       description: '',
     },
+    validate: {
+      name: (value) => (value.length > 0 ? null : 'Estate name is required'),
+      code: (value) => (value.length > 0 ? null : 'Estate code is required'),
+    },
   });
 
   useEffect(() => {
@@ -32,23 +36,25 @@ const EditEstateModal: React.FC<EditEstateModalProps> = ({ isOpen, onClose, onUp
     }
   }, [estate]);
 
-  const handleSubmit = () => {
+  const handleSubmit = (values: typeof form.values) => {
     if (estate) {
-      onUpdateEstate({ ...estate, ...form.values });
+      onUpdateEstate({ ...estate, ...values });
     }
     onClose();
   };
 
   return (
     <Modal opened={isOpen} onClose={onClose} title="Edit Estate">
-      <TextInput label="Estate Name" {...form.getInputProps('name')} mb="sm" />
-      <TextInput label="Estate Code" {...form.getInputProps('code')} mb="sm" />
-      <TextInput label="Location" {...form.getInputProps('location')} mb="sm" />
-      <TextInput label="Description" {...form.getInputProps('description')} mb="md" />
-      <Group justify="right" mt="lg">
-        <Button variant="default" onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSubmit}>Update Estate</Button>
-      </Group>
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        <TextInput label="Estate Name" {...form.getInputProps('name')} required mb="sm" />
+        <TextInput label="Estate Code" {...form.getInputProps('code')} required mb="sm" />
+        <TextInput label="Location" {...form.getInputProps('location')} mb="sm" />
+        <TextInput label="Description" {...form.getInputProps('description')} mb="md" />
+        <Group justify="right" mt="lg">
+          <Button variant="default" onClick={onClose}>Cancel</Button>
+          <Button type="submit">Update Estate</Button>
+        </Group>
+      </form>
     </Modal>
   );
 };

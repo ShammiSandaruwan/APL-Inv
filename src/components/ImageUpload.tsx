@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { showErrorToast, showSuccessToast } from '../utils/toast';
-import { FaUpload, FaTrash } from 'react-icons/fa';
+import { IconUpload, IconTrash } from '@tabler/icons-react';
 
 interface ImageUploadProps {
   onPhotoChange: (urls: string[]) => void;
@@ -54,7 +54,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onPhotoChange, initialUrls = 
       <label className="block text-sm font-medium text-mine-shaft">Photos</label>
       <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-silver-chalice border-dashed rounded-md">
         <div className="space-y-1 text-center">
-          <FaUpload className="mx-auto h-12 w-12 text-silver-chalice" />
+          <IconUpload className="mx-auto h-12 w-12 text-silver-chalice" />
           <div className="flex text-sm text-scorpion">
             <label
               htmlFor="file-upload"
@@ -78,7 +78,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onPhotoChange, initialUrls = 
               onClick={() => handleRemoveImage(url)}
               className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 text-xs hover:bg-red-700 transition-colors"
             >
-              <FaTrash />
+              <IconTrash />
             </button>
           </div>
         ))}

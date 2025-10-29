@@ -1,19 +1,20 @@
 // src/App.tsx
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './pages/auth/LoginPage';
-import DashboardPage from './pages/dashboard/DashboardPage';
-import EstatesPage from './pages/estates/EstatesPage';
-import BuildingsPage from './pages/buildings/BuildingsPage';
-import ItemsPage from './pages/items/ItemsPage';
-import CategoriesPage from './pages/categories/CategoriesPage';
-import EstateDetailPage from './pages/estates/EstateDetailPage';
-import BuildingDetailPage from './pages/buildings/BuildingDetailPage';
-import ItemDetailPage from './pages/items/ItemDetailPage';
-import UserManagementPage from './pages/users/UserManagementPage';
-import ReportsPage from './pages/reports/ReportsPage';
-import AuditLogsPage from './pages/audit/AuditLogsPage';
-import NotFoundPage from './pages/NotFoundPage';
+
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
+const EstatesPage = lazy(() => import('./pages/estates/EstatesPage'));
+const BuildingsPage = lazy(() => import('./pages/buildings/BuildingsPage'));
+const ItemsPage = lazy(() => import('./pages/items/ItemsPage'));
+const CategoriesPage = lazy(() => import('./pages/categories/CategoriesPage'));
+const EstateDetailPage = lazy(() => import('./pages/estates/EstateDetailPage'));
+const BuildingDetailPage = lazy(() => import('./pages/buildings/BuildingDetailPage'));
+const ItemDetailPage = lazy(() => import('./pages/items/ItemDetailPage'));
+const UserManagementPage = lazy(() => import('./pages/users/UserManagementPage'));
+const ReportsPage = lazy(() => import('./pages/reports/ReportsPage'));
+const AuditLogsPage = lazy(() => import('./pages/audit/AuditLogsPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 import ProtectedRoute from './router/ProtectedRoute';
 import DashboardLayout from './layout/DashboardLayout';
 import { useAuth } from './hooks/useAuth';
@@ -27,7 +28,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><Spinner /></div>}>
       <Routes>
         <Route path="/login" element={session ? <Navigate to="/" /> : <LoginPage />} />
         <Route path="/" element={<ProtectedRoute />}>
@@ -47,7 +48,7 @@ const App: React.FC = () => {
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-    </>
+    </Suspense>
   );
 };
 

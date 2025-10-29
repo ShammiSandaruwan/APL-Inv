@@ -1,16 +1,35 @@
 // src/layout/DashboardLayout.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import Button from '../components/Button';
 import logo from '../assets/logo.png';
-import { FaTachometerAlt, FaBuilding, FaBoxOpen, FaSignOutAlt, FaTags, FaUsers, FaChartBar, FaHistory, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { Image, Hidden, Drawer, Burger } from '@mantine/core';
+import {
+  IconTachometer,
+  IconBuilding,
+  IconBox,
+  IconLogout,
+  IconTag,
+  IconUsers,
+  IconChartBar,
+  IconHistory,
+  IconChevronLeft,
+  IconChevronRight
+} from '@tabler/icons-react';
 import { useAuth } from '../hooks/useAuth'; // Get user info
 import Header from './Header';
 
 const DashboardLayout: React.FC = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    return savedState ? JSON.parse(savedState) : false;
+  });
   const { profile } = useAuth();
+
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(isCollapsed));
+  }, [isCollapsed]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -22,65 +41,95 @@ const DashboardLayout: React.FC = () => {
   const activeLinkStyles = "bg-gradient-to-r from-primary to-blue-400 text-white font-semibold shadow-lg shadow-primary/30";
 
   return (
-    <div className="flex h-screen bg-background text-text-primary">
+    <div style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--mantine-color-body)', color: 'var(--mantine-color-text)' }}>
       {/* Sidebar */}
-      <aside className={`transition-all duration-300 ease-in-out bg-card border-r border-border flex flex-col ${isCollapsed ? 'w-24' : 'w-72'}`}>
-        <div className="p-6 flex items-center">
-          <div className="p-2 bg-gradient-primary rounded-xl">
-            <img src={logo} alt="Company Logo" className="w-8 h-8" />
-          </div>
-          {!isCollapsed && <span className="ml-4 text-xl font-bold">Your App</span>}
-          <button onClick={() => setIsCollapsed(!isCollapsed)} className="text-neutral-400 hover:text-primary ml-auto">
-            {isCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
+      <Hidden smDown>
+        <aside style={{ transition: 'width 300ms ease-in-out', backgroundColor: 'var(--mantine-color-body)', borderRight: '1px solid var(--mantine-color-border)', display: 'flex', flexDirection: 'column', width: isCollapsed ? '6rem' : '18rem' }}>
+          <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center' }}>
+            <Image src={logo} alt="Company Logo" h={40} fit="contain" />
+          {!isCollapsed && <span style={{ marginLeft: '1rem', fontSize: '1.25rem', fontWeight: 'bold' }}>Your App</span>}
+          <button onClick={() => setIsCollapsed(!isCollapsed)} style={{ color: 'var(--mantine-color-gray-5)', marginLeft: 'auto' }} aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
+            {isCollapsed ? <IconChevronRight /> : <IconChevronLeft />}
           </button>
         </div>
 
-        <nav className="flex-1 p-6 space-y-3">
+        <nav style={{ flex: '1', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {[
-            { to: "/", icon: FaTachometerAlt, label: "Dashboard" },
-            { to: "/estates", icon: FaBuilding, label: "Estates", badge: 15 },
-            { to: "/buildings", icon: FaBuilding, label: "Buildings" },
-            { to: "/items", icon: FaBoxOpen, label: "Items", badge: 248 },
-            { to: "/categories", icon: FaTags, label: "Categories" },
-            { to: "/users", icon: FaUsers, label: "Users" },
-            { to: "/reports", icon: FaChartBar, label: "Reports" },
-            { to: "/audit-logs", icon: FaHistory, label: "Audit Logs" },
+            { to: "/", icon: IconTachometer, label: "Dashboard" },
+            { to: "/estates", icon: IconBuilding, label: "Estates", badge: 15 },
+            { to: "/buildings", icon: IconBuilding, label: "Buildings" },
+            { to: "/items", icon: IconBox, label: "Items", badge: 248 },
+            { to: "/categories", icon: IconTag, label: "Categories" },
+            { to: "/users", icon: IconUsers, label: "Users" },
+            { to: "/reports", icon: IconChartBar, label: "Reports" },
+            { to: "/audit-logs", icon: IconHistory, label: "Audit Logs" },
           ].map(link => (
-            <NavLink key={link.to} to={link.to} end={link.to === "/"} className={({ isActive }) => `${isCollapsed ? collapsedLinkStyles : linkStyles} ${isActive ? activeLinkStyles : ''}`}>
-              <div className="flex items-center">
-                <link.icon className={`text-xl ${!isCollapsed ? 'mr-4' : ''}`} />
+            <NavLink key={link.to} to={link.to} end={link.to === "/"} style={({ isActive }) => ({ ...isCollapsed ? collapsedLinkStyles : linkStyles, ...(isActive ? activeLinkStyles : {}) })}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <link.icon style={{ fontSize: '1.25rem', marginRight: !isCollapsed ? '1rem' : '0' }} />
                 {!isCollapsed && <span>{link.label}</span>}
               </div>
               {!isCollapsed && link.badge && (
-                <span className="text-xs font-bold bg-secondary-light text-secondary rounded-full px-2 py-0.5">{link.badge}</span>
+                <span style={{ fontSize: '0.75rem', fontWeight: 'bold', backgroundColor: 'var(--mantine-color-secondary-light)', color: 'var(--mantine-color-secondary)', borderRadius: '9999px', padding: '0.125rem 0.5rem' }}>{link.badge}</span>
               )}
             </NavLink>
           ))}
         </nav>
 
-        <div className="p-6 border-t border-border">
-          <div className="flex items-center">
-            <img className="h-10 w-10 rounded-full object-cover" src="https://i.pravatar.cc/100" alt="User" />
+        <div style={{ padding: '1.5rem', borderTop: '1px solid var(--mantine-color-border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <img style={{ height: '2.5rem', width: '2.5rem', borderRadius: '9999px', objectFit: 'cover' }} src="https://i.pravatar.cc/100" alt="User" />
             {!isCollapsed && (
-              <div className="ml-4">
-                <p className="text-sm font-semibold text-text-primary">{profile?.full_name || 'Admin User'}</p>
-                <p className="text-xs text-text-secondary">{profile?.role || 'Super Admin'}</p>
+              <div style={{ marginLeft: '1rem' }}>
+                <p style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--mantine-color-text)' }}>{profile?.full_name || 'Admin User'}</p>
+                <p style={{ fontSize: '0.75rem', color: 'var(--mantine-color-dimmed)' }}>{profile?.role || 'Super Admin'}</p>
               </div>
             )}
-            <Button onClick={handleLogout} variant="secondary" size="sm" className="ml-auto">
-              <FaSignOutAlt />
+            <Button onClick={handleLogout} variant="secondary" size="sm" style={{ marginLeft: 'auto' }} aria-label="Logout">
+              <IconLogout />
             </Button>
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-8">
+      <div style={{ flex: '1', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'margin-left 300ms ease-in-out', marginLeft: isCollapsed ? '6rem' : '18rem' }}>
+        <Header isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+        <main style={{ flex: '1', overflowY: 'auto', padding: '2rem' }}>
           <Outlet />
         </main>
       </div>
+      <Drawer
+        opened={isCollapsed}
+        onClose={() => setIsCollapsed(false)}
+        title="Menu"
+        padding="xl"
+        size="md"
+        hiddenFrom="sm"
+      >
+        <nav style={{ flex: '1', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {[
+            { to: "/", icon: IconTachometer, label: "Dashboard" },
+            { to: "/estates", icon: IconBuilding, label: "Estates", badge: 15 },
+            { to: "/buildings", icon: IconBuilding, label: "Buildings" },
+            { to: "/items", icon: IconBox, label: "Items", badge: 248 },
+            { to: "/categories", icon: IconTag, label: "Categories" },
+            { to: "/users", icon: IconUsers, label: "Users" },
+            { to: "/reports", icon: IconChartBar, label: "Reports" },
+            { to: "/audit-logs", icon: IconHistory, label: "Audit Logs" },
+          ].map(link => (
+            <NavLink key={link.to} to={link.to} end={link.to === "/"} style={({ isActive }) => ({ ...linkStyles, ...(isActive ? activeLinkStyles : {}) })}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <link.icon style={{ fontSize: '1.25rem', marginRight: '1rem' }} />
+                <span>{link.label}</span>
+              </div>
+              {link.badge && (
+                <span style={{ fontSize: '0.75rem', fontWeight: 'bold', backgroundColor: 'var(--mantine-color-secondary-light)', color: 'var(--mantine-color-secondary)', borderRadius: '9999px', padding: '0.125rem 0.5rem' }}>{link.badge}</span>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+      </Drawer>
     </div>
   );
 };

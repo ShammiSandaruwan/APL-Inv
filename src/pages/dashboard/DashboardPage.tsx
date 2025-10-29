@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabaseClient';
 import { showErrorToast } from '../../utils/toast';
 import { Card, Grid, Text } from '@mantine/core';
 import StatCard from '../../components/ui/StatCard';
-import { FaBuilding, FaBoxOpen, FaGlobeAmericas } from 'react-icons/fa';
+import { IconBuilding, IconBox, IconWorld } from '@tabler/icons-react';
 import Spinner from '../../components/Spinner';
 
 const DashboardPage: React.FC = () => {
@@ -50,13 +50,13 @@ const DashboardPage: React.FC = () => {
       ) : (
         <Grid>
           <Grid.Col span={{ base: 12, md: 4 }}>
-            <StatCard title="Total Estates" value={stats.estates} icon={<FaGlobeAmericas />} color="blue" />
+            <StatCard title="Total Estates" value={stats.estates} icon={<IconWorld />} color="blue" />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 4 }}>
-            <StatCard title="Total Buildings" value={stats.buildings} icon={<FaBuilding />} color="grape" />
+            <StatCard title="Total Buildings" value={stats.buildings} icon={<IconBuilding />} color="grape" />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 4 }}>
-            <StatCard title="Total Items" value={stats.items} icon={<FaBoxOpen />} color="teal" />
+            <StatCard title="Total Items" value={stats.items} icon={<IconBox />} color="teal" />
           </Grid.Col>
         </Grid>
       )}
