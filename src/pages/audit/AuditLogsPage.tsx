@@ -1,8 +1,9 @@
 // src/pages/audit/AuditLogsPage.tsx
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import Spinner from '../../components/Spinner';
+import Table from '../../components/Table';
 import { showErrorToast } from '../../utils/toast';
-import { Table, Title, Loader, Center } from '@mantine/core';
 
 // Define the type for an audit log object
 export interface AuditLog {
@@ -36,37 +37,25 @@ const AuditLogsPage: React.FC = () => {
     fetchLogs();
   }, []);
 
-  const rows = logs.map((log) => (
-    <tr key={log.id}>
-      <td>{new Date(log.created_at).toLocaleString()}</td>
-      <td>{log.action}</td>
-      <td>{log.entity}</td>
-      <td>{log.user_id}</td>
-    </tr>
-  ));
+  const columns = [
+    { header: 'Timestamp', accessor: 'created_at' },
+    { header: 'Action', accessor: 'action' },
+    { header: 'Entity', accessor: 'entity' },
+    { header: 'User ID', accessor: 'user_id' },
+  ];
 
   if (isLoading) {
     return (
-      <Center style={{ height: '100%' }}>
-        <Loader />
-      </Center>
+      <div className="flex justify-center items-center h-full">
+        <Spinner />
+      </div>
     );
   }
 
   return (
     <div>
-      <Title order={2} mb="lg">Audit Logs</Title>
-      <Table striped highlightOnHover withBorder withColumnBorders>
-        <thead>
-          <tr>
-            <th>Timestamp</th>
-            <th>Action</th>
-            <th>Entity</th>
-            <th>User ID</th>
-          </tr>
-        </thead>
-        <tbody>{rows}</tbody>
-      </Table>
+      <h1 className="text-2xl font-bold text-mine-shaft mb-6">Audit Logs</h1>
+      <Table columns={columns} data={logs} />
     </div>
   );
 };

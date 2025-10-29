@@ -1,21 +1,18 @@
 // src/utils/toast.ts
-import { notifications } from '@mantine/notifications';
-import { IconCheck, IconX } from '@tabler/icons-react';
+import { toast } from 'react-hot-toast';
 
 export const showSuccessToast = (message: string) => {
-  notifications.show({
-    title: 'Success',
-    message,
-    color: 'teal',
-    icon: <IconCheck size={18} />,
-  });
+  toast.success(message);
 };
 
 export const showErrorToast = (message: string) => {
-  notifications.show({
-    title: 'Error',
-    message,
-    color: 'red',
-    icon: <IconX size={18} />,
-  });
+  toast.error(message);
+};
+
+export const showLoadingToast = (message: string) => {
+  return toast.loading(message);
+};
+
+export const dismissToast = (toastId: string) => {
+  toast.dismiss(toastId);
 };

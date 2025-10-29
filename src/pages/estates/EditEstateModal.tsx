@@ -1,9 +1,8 @@
 // src/pages/estates/EditEstateModal.tsx
-import React, { useEffect, useState } from 'react';
-import Modal from '../../components/Modal';
-import Input from '../../components/Input';
-import Button from '../../components/Button';
-import type { Estate } from './EstatesPage';
+import { Modal, TextInput, Button, Group } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { useEffect } from 'react';
+import type { Estate } from '../../types';
 
 interface EditEstateModalProps {
   isOpen: boolean;
@@ -13,63 +12,43 @@ interface EditEstateModalProps {
 }
 
 const EditEstateModal: React.FC<EditEstateModalProps> = ({ isOpen, onClose, onUpdateEstate, estate }) => {
-  const [name, setName] = useState('');
-  const [code, setCode] = useState('');
-  const [location, setLocation] = useState('');
+  const form = useForm({
+    initialValues: {
+      name: '',
+      code: '',
+      location: '',
+      description: '',
+    },
+  });
 
   useEffect(() => {
     if (estate) {
-      setName(estate.name);
-      setCode(estate.code);
-      setLocation(estate.location);
+      form.setValues({
+        name: estate.name,
+        code: estate.code,
+        location: estate.location,
+        description: estate.description || '',
+      });
     }
   }, [estate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     if (estate) {
-      onUpdateEstate({ ...estate, name, code, location });
+      onUpdateEstate({ ...estate, ...form.values });
     }
+    onClose();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Estate">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Estate Name"
-          id="name"
-          name="name"
-          type="text"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <Input
-          label="Estate Code"
-          id="code"
-          name="code"
-          type="text"
-          required
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-        />
-        <Input
-          label="Location/City"
-          id="location"
-          name="location"
-          type="text"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-        />
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="submit">
-            Save Changes
-          </Button>
-        </div>
-      </form>
+    <Modal opened={isOpen} onClose={onClose} title="Edit Estate">
+      <TextInput label="Estate Name" {...form.getInputProps('name')} mb="sm" />
+      <TextInput label="Estate Code" {...form.getInputProps('code')} mb="sm" />
+      <TextInput label="Location" {...form.getInputProps('location')} mb="sm" />
+      <TextInput label="Description" {...form.getInputProps('description')} mb="md" />
+      <Group justify="right" mt="lg">
+        <Button variant="default" onClick={onClose}>Cancel</Button>
+        <Button onClick={handleSubmit}>Update Estate</Button>
+      </Group>
     </Modal>
   );
 };

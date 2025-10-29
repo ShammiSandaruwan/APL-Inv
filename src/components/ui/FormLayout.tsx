@@ -17,7 +17,7 @@ const FormLayout: React.FC<FormLayoutProps> = ({ title, children, onCancel, onSu
 
       {children}
 
-      <Group position="right" mt="xl">
+      <Group justify="right" mt="xl">
         <Button variant="default" onClick={onCancel}>
           Cancel
         </Button>

@@ -14,7 +14,6 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <MantineProvider
         theme={{
-          colorScheme: 'light',
           primaryColor: 'blue',
           fontFamily: 'Inter, sans-serif',
           defaultRadius: 'md',
@@ -61,8 +60,6 @@ createRoot(document.getElementById('root')!).render(
             textColor: '#1A202C',
           },
         }}
-        withGlobalStyles
-        withNormalizeCSS
       >
         <Notifications />
         <AuthProvider>

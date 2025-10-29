@@ -1,155 +1,82 @@
 // src/pages/items/AddItemModal.tsx
-import React, { useEffect, useState } from 'react';
-import Modal from '../../components/Modal';
-import Input from '../../components/Input';
-import Button from '../../components/Button';
-import ImageUpload from '../../components/ImageUpload';
-import type { Estate } from '../estates/EstatesPage';
-import type { Building } from '../../types';
+import { Modal, TextInput, Button, Select, Group } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import type { Item } from '../../types';
-import { showErrorToast } from '../../utils/toast';
+import type { Building } from '../../types';
+import type { Estate } from '../../types';
+import ImageUpload from '../../components/ImageUpload';
 
 interface AddItemModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddItem: (item: Omit<Item, 'id' | 'buildings'>) => void;
+  onAddItem: (item: any) => void;
 }
 
 const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onAddItem }) => {
-  const [name, setName] = useState('');
-  const [itemCode, setItemCode] = useState('');
-  const [estateId, setEstateId] = useState('');
-  const [buildingId, setBuildingId] = useState('');
-  const [photos, setPhotos] = useState<string[]>([]);
   const [estates, setEstates] = useState<Estate[]>([]);
   const [buildings, setBuildings] = useState<Building[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+
+  const form = useForm({
+    initialValues: {
+      name: '',
+      item_code: '',
+      estate_id: '',
+      building_id: '',
+    },
+  });
 
   useEffect(() => {
+    // Fetch estates for the dropdown
     const fetchEstates = async () => {
-      const { data, error } = await supabase.from('estates').select('*');
-      if (error) {
-        showErrorToast(error.message);
-      } else {
-        setEstates(data as Estate[]);
-      }
+      const { data } = await supabase.from('estates').select('*');
+      setEstates(data || []);
     };
-
-    if (isOpen) {
-      fetchEstates();
-    }
-  }, [isOpen]);
+    fetchEstates();
+  }, []);
 
   useEffect(() => {
+    // Fetch buildings based on selected estate
     const fetchBuildings = async () => {
-      if (estateId) {
-        const { data, error } = await supabase
-          .from('buildings')
-          .select('*')
-          .eq('estate_id', estateId);
-        if (error) {
-          showErrorToast(error.message);
-        } else {
-          setBuildings(data as Building[]);
-        }
-      } else {
-        setBuildings([]);
+      if (form.values.estate_id) {
+        const { data } = await supabase.from('buildings').select('*').eq('estate_id', form.values.estate_id);
+        setBuildings(data || []);
       }
     };
-
     fetchBuildings();
-  }, [estateId]);
+  }, [form.values.estate_id]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!estateId || !buildingId) {
-      showErrorToast('Please select an estate and a building.');
-      return;
-    }
-    onAddItem({
-      name,
-      item_code: itemCode,
-      estate_id: estateId,
-      building_id: buildingId,
-      photos,
-    });
+  const handleSubmit = () => {
+    onAddItem({ ...form.values, photos: imageUrls });
+    form.reset();
+    setImageUrls([]);
+    onClose();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add New Item">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Item Name"
-          id="name"
-          name="name"
-          type="text"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <Input
-          label="Item Code"
-          id="itemCode"
-          name="itemCode"
-          type="text"
-          required
-          value={itemCode}
-          onChange={(e) => setItemCode(e.target.value)}
-        />
-        <div>
-          <label htmlFor="estate" className="block text-sm font-medium text-mine-shaft">
-            Estate
-          </label>
-          <select
-            id="estate"
-            name="estate"
-            required
-            value={estateId}
-            onChange={(e) => {
-              setEstateId(e.target.value);
-              setBuildingId('');
-            }}
-            className="mt-1 block w-full px-3 py-2 bg-white border border-silver-chalice rounded-md text-sm shadow-sm placeholder-scorpion focus:outline-none focus:ring-bay-leaf focus:border-bay-leaf"
-          >
-            <option value="" disabled>Select an estate</option>
-            {estates.map((estate) => (
-              <option key={estate.id} value={estate.id}>
-                {estate.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="building" className="block text-sm font-medium text-mine-shaft">
-            Building
-          </label>
-          <select
-            id="building"
-            name="building"
-            required
-            value={buildingId}
-            onChange={(e) => setBuildingId(e.target.value)}
-            disabled={!estateId}
-            className="mt-1 block w-full px-3 py-2 bg-white border border-silver-chalice rounded-md text-sm shadow-sm placeholder-scorpion focus:outline-none focus:ring-bay-leaf focus:border-bay-leaf"
-          >
-            <option value="" disabled>Select a building</option>
-            {buildings.map((building) => (
-              <option key={building.id} value={building.id}>
-                {building.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <ImageUpload onPhotoChange={setPhotos} />
-        <div className="flex justify-end space-x-2 pt-4">
-          <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="submit">
-            Save Item
-          </Button>
-        </div>
-      </form>
+    <Modal opened={isOpen} onClose={onClose} title="Add New Item">
+      <TextInput label="Item Name" {...form.getInputProps('name')} mb="sm" />
+      <TextInput label="Item Code" {...form.getInputProps('item_code')} mb="sm" />
+      <Select
+        label="Estate"
+        placeholder="Select estate"
+        data={estates.map(e => ({ value: e.id || '', label: e.name }))}
+        {...form.getInputProps('estate_id')}
+        mb="sm"
+      />
+      <Select
+        label="Building"
+        placeholder="Select building"
+        data={buildings.map(b => ({ value: b.id || '', label: b.name }))}
+        {...form.getInputProps('building_id')}
+        mb="sm"
+      />
+      <ImageUpload onPhotoChange={setImageUrls} />
+      <Group justify="right" mt="lg">
+        <Button variant="default" onClick={onClose}>Cancel</Button>
+        <Button onClick={handleSubmit}>Add Item</Button>
+      </Group>
     </Modal>
   );
 };
