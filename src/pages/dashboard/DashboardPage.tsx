@@ -1,24 +1,35 @@
 // src/pages/dashboard/DashboardPage.tsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 import { showErrorToast } from '../../utils/toast';
-import Card from '../../components/Card';
-import { FaBuilding, FaBoxOpen, FaGlobeAmericas } from 'react-icons/fa';
-import Spinner from '../../components/Spinner';
+import { Card, Grid, Text, Group, ThemeIcon, Loader, Title, SimpleGrid, Paper, UnstyledButton } from '@mantine/core';
+import { IconBuilding, IconBox, IconWorld } from '@tabler/icons-react';
+import type { ReactNode } from 'react';
 
-const StatDisplay: React.FC<{ title: string; value: number; icon: React.ReactNode; gradient: string }> = ({ title, value, icon, gradient }) => (
-  <Card className="hover:shadow-xl transition-shadow duration-300">
-    <div className="flex items-center">
-      <div className={`p-4 rounded-2xl text-white ${gradient}`}>
-        {React.cloneElement(icon as React.ReactElement, { className: 'text-3xl' })}
+interface StatDisplayProps {
+  title: string;
+  value: number;
+  icon: ReactNode;
+  color: string;
+}
+
+const StatDisplay: React.FC<StatDisplayProps> = ({ title, value, icon, color }) => (
+  <Paper withBorder p="md" radius="md">
+    <Group>
+      <ThemeIcon color={color} variant="light" size={60} radius="md">
+        {icon}
+      </ThemeIcon>
+      <div>
+        <Text color="dimmed" size="xs" transform="uppercase" weight={700}>
+          {title}
+        </Text>
+        <Text weight={700} size="xl">
+          {value}
+        </Text>
       </div>
-      <div className="ml-6">
-        <p className="text-sm font-medium text-text-secondary">{title}</p>
-        <p className="text-3xl font-bold text-text-primary">{value}</p>
-      </div>
-    </div>
-  </Card>
+    </Group>
+  </Paper>
 );
 
 const DashboardPage: React.FC = () => {
@@ -48,47 +59,65 @@ const DashboardPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-10 animate-fade-in">
-      <div>
-        <h1 className="text-4xl font-bold text-text-primary">Dashboard</h1>
-        <p className="text-text-secondary mt-2 text-lg">
-          Welcome back! Here's a snapshot of your asset ecosystem.
-        </p>
-      </div>
+    <div style={{ animation: 'fadeIn 1s' }}>
+      <Title order={1}>Dashboard</Title>
+      <Text color="dimmed" mt="sm" mb="xl">
+        Welcome back! Here's a snapshot of your asset ecosystem.
+      </Text>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-48">
-          <Spinner />
-        </div>
+        <Group position="center" py="xl">
+          <Loader />
+        </Group>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <StatDisplay title="Total Estates" value={stats.estates} icon={<FaGlobeAmericas />} gradient="bg-gradient-to-br from-primary to-blue-400" />
-          <StatDisplay title="Total Buildings" value={stats.buildings} icon={<FaBuilding />} gradient="bg-gradient-to-br from-secondary to-purple-400" />
-          <StatDisplay title="Total Items" value={stats.items} icon={<FaBoxOpen />} gradient="bg-gradient-to-br from-accent-green to-teal-400" />
-        </div>
+        <SimpleGrid
+          cols={3}
+          spacing="lg"
+          breakpoints={[
+            { maxWidth: 'md', cols: 2 },
+            { maxWidth: 'sm', cols: 1 },
+          ]}
+        >
+          <StatDisplay title="Total Estates" value={stats.estates} icon={<IconWorld size={32} />} color="indigo" />
+          <StatDisplay title="Total Buildings" value={stats.buildings} icon={<IconBuilding size={32} />} color="blue" />
+          <StatDisplay title="Total Items" value={stats.items} icon={<IconBox size={32} />} color="teal" />
+        </SimpleGrid>
       )}
 
-      <Card title="Quick Actions">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-2">
-          <Link to="/estates" className="block p-6 rounded-xl hover:bg-background transition-colors">
-            <h3 className="text-lg font-semibold text-primary">Manage Estates</h3>
-            <p className="text-text-secondary mt-2 text-sm">
-              Oversee all 15 estates, view details, and manage properties.
-            </p>
-          </Link>
-          <Link to="/buildings" className="block p-6 rounded-xl hover:bg-background transition-colors">
-            <h3 className="text-lg font-semibold text-primary">Manage Buildings</h3>
-            <p className="text-text-secondary mt-2 text-sm">
-              Track factories, bungalows, and staff quarters.
-            </p>
-          </Link>
-          <Link to="/items" className="block p-6 rounded-xl hover:bg-background transition-colors">
-            <h3 className="text-lg font-semibold text-primary">Manage Items</h3>
-            <p className="text-text-secondary mt-2 text-sm">
-              Keep a detailed inventory of all assets and equipment.
-            </p>
-          </Link>
-        </div>
+      <Card withBorder radius="md" mt="xl">
+        <Title order={3} mb="md">Quick Actions</Title>
+        <SimpleGrid
+          cols={3}
+          spacing="lg"
+          breakpoints={[
+            { maxWidth: 'sm', cols: 1 },
+          ]}
+        >
+          <UnstyledButton component={Link} to="/estates">
+            <Paper withBorder p="md" radius="sm" sx={{ '&:hover': { backgroundColor: '#f8f9fa' } }}>
+              <Text color="indigo" weight={500}>Manage Estates</Text>
+              <Text size="sm" color="dimmed" mt={4}>
+                Oversee all estates, view details, and manage properties.
+              </Text>
+            </Paper>
+          </UnstyledButton>
+          <UnstyledButton component={Link} to="/buildings">
+            <Paper withBorder p="md" radius="sm" sx={{ '&:hover': { backgroundColor: '#f8f9fa' } }}>
+              <Text color="indigo" weight={500}>Manage Buildings</Text>
+              <Text size="sm" color="dimmed" mt={4}>
+                Track factories, bungalows, and staff quarters.
+              </Text>
+            </Paper>
+          </UnstyledButton>
+          <UnstyledButton component={Link} to="/items">
+            <Paper withBorder p="md" radius="sm" sx={{ '&:hover': { backgroundColor: '#f8f9fa' } }}>
+              <Text color="indigo" weight={500}>Manage Items</Text>
+              <Text size="sm" color="dimmed" mt={4}>
+                Keep a detailed inventory of all assets and equipment.
+              </Text>
+            </Paper>
+          </UnstyledButton>
+        </SimpleGrid>
       </Card>
     </div>
   );

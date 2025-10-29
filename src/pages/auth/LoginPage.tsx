@@ -1,10 +1,19 @@
 // src/pages/auth/LoginPage.tsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import Button from '../../components/Button';
-import Input from '../../components/Input';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import logo from '../../assets/logo.png';
+import {
+  Paper,
+  TextInput,
+  PasswordInput,
+  Button,
+  Title,
+  Text,
+  Container,
+  Image,
+  Stack,
+} from '@mantine/core';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -30,43 +39,42 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gin px-4">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <div className="flex flex-col items-center text-center">
-          <img src={logo} alt="Company Logo" className="w-32 mb-4" />
-          <h1 className="text-2xl font-bold text-mine-shaft">
-            Estate Asset Management
-          </h1>
-        </div>
-        <form onSubmit={handleLogin} className="space-y-6">
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            label="Email Address"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            label="Password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <div>
-            <Button type="submit" className="w-full" isLoading={isLoading}>
+    <Container size={420} my={40}>
+      <Stack align="center" spacing="md">
+        <Image src={logo} alt="Company Logo" width={80} />
+        <Title align="center">
+          Estate Asset Management
+        </Title>
+      </Stack>
+
+      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+        <form onSubmit={handleLogin}>
+          <Stack>
+            <TextInput
+              required
+              label="Email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(event) => setEmail(event.currentTarget.value)}
+              radius="md"
+              name="email"
+            />
+            <PasswordInput
+              required
+              label="Password"
+              placeholder="Your password"
+              value={password}
+              onChange={(event) => setPassword(event.currentTarget.value)}
+              radius="md"
+              name="password"
+            />
+            <Button type="submit" loading={isLoading} fullWidth mt="xl" radius="md">
               Sign In
             </Button>
-          </div>
+          </Stack>
         </form>
-      </div>
-    </div>
+      </Paper>
+    </Container>
   );
 };
 
