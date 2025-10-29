@@ -4,7 +4,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import Button from '../components/Button';
 import logo from '../assets/logo.png';
-import { Image, Drawer, Burger } from '@mantine/core';
+import { Image, Drawer, Box } from '@mantine/core';
 import {
   IconDashboard,
   IconBuilding,
@@ -35,38 +35,10 @@ const DashboardLayout: React.FC = () => {
     await supabase.auth.signOut();
   };
 
-  const linkStyles = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    color: 'var(--mantine-color-gray-7)',
-    borderRadius: 'var(--mantine-radius-md)',
-    padding: '0.75rem 1rem',
-    transition: 'all 200ms ease',
-    '&:hover': {
-      backgroundColor: 'var(--mantine-color-primary-light)',
-      color: 'var(--mantine-color-primary)',
-    },
-  };
-
-  const collapsedLinkStyles = {
-    ...linkStyles,
-    height: '3rem',
-    width: '3rem',
-    justifyContent: 'center',
-  };
-
-  const activeLinkStyles = {
-    backgroundImage: 'linear-gradient(to right, var(--mantine-color-primary-6), var(--mantine-color-blue-4))',
-    color: 'white',
-    fontWeight: 600,
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-  };
-
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--mantine-color-body)', color: 'var(--mantine-color-text)' }}>
       {/* Sidebar */}
-      <aside style={{ transition: 'width 300ms ease-in-out', backgroundColor: 'var(--mantine-color-body)', borderRight: '1px solid var(--mantine-color-border)', display: 'flex', flexDirection: 'column', width: isCollapsed ? '6rem' : '18rem', ['@media (max-width: 768px)']: { display: 'none' } }}>
+      <Box component="aside" hiddenFrom="sm" style={{ transition: 'width 300ms ease-in-out', backgroundColor: 'var(--mantine-color-body)', borderRight: '1px solid var(--mantine-color-border)', display: 'flex', flexDirection: 'column', width: isCollapsed ? '6rem' : '18rem' }}>
           <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center' }}>
             <Image src={logo} alt="Company Logo" h={40} fit="contain" />
           {!isCollapsed && <span style={{ marginLeft: '1rem', fontSize: '1.25rem', fontWeight: 'bold' }}>Your App</span>}
@@ -86,7 +58,21 @@ const DashboardLayout: React.FC = () => {
             { to: "/reports", icon: IconChartBar, label: "Reports" },
             { to: "/audit-logs", icon: IconHistory, label: "Audit Logs" },
           ].map(link => (
-            <NavLink key={link.to} to={link.to} end={link.to === "/"} style={({ isActive }) => ({ ...isCollapsed ? collapsedLinkStyles : linkStyles, ...(isActive ? activeLinkStyles : {}) })}>
+            <NavLink key={link.to} to={link.to} end={link.to === "/"} style={({ isActive }) => ({
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: isCollapsed ? 'center' : 'space-between',
+              height: isCollapsed ? '3rem' : 'auto',
+              width: isCollapsed ? '3rem' : 'auto',
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--mantine-radius-md)',
+              color: isActive ? 'white' : 'var(--mantine-color-gray-7)',
+              backgroundColor: isActive ? 'var(--mantine-color-primary-6)' : 'transparent',
+              transition: 'all 200ms ease',
+              '&:hover': {
+                backgroundColor: isActive ? 'var(--mantine-color-primary-7)' : 'var(--mantine-color-primary-light)',
+              },
+            })}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <link.icon style={{ fontSize: '1.25rem', marginRight: !isCollapsed ? '1rem' : '0' }} />
                 {!isCollapsed && <span>{link.label}</span>}
@@ -112,7 +98,7 @@ const DashboardLayout: React.FC = () => {
             </Button>
           </div>
         </div>
-      </aside>
+      </Box>
 
       {/* Main Content */}
       <div style={{ flex: '1', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'margin-left 300ms ease-in-out', marginLeft: isCollapsed ? '6rem' : '18rem' }}>
@@ -140,7 +126,19 @@ const DashboardLayout: React.FC = () => {
             { to: "/reports", icon: IconChartBar, label: "Reports" },
             { to: "/audit-logs", icon: IconHistory, label: "Audit Logs" },
           ].map(link => (
-            <NavLink key={link.to} to={link.to} end={link.to === "/"} style={({ isActive }) => ({ ...linkStyles, ...(isActive ? activeLinkStyles : {}) })}>
+            <NavLink key={link.to} to={link.to} end={link.to === "/"} style={({ isActive }) => ({
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--mantine-radius-md)',
+              color: isActive ? 'white' : 'var(--mantine-color-gray-7)',
+              backgroundColor: isActive ? 'var(--mantine-color-primary-6)' : 'transparent',
+              transition: 'all 200ms ease',
+              '&:hover': {
+                backgroundColor: isActive ? 'var(--mantine-color-primary-7)' : 'var(--mantine-color-primary-light)',
+              },
+            })}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <link.icon style={{ fontSize: '1.25rem', marginRight: '1rem' }} />
                 <span>{link.label}</span>
