@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
 import { showErrorToast } from '../../utils/toast';
-import { Card, Grid, Text } from '@mantine/core';
+import { Card, Grid, Text, Container } from '@mantine/core';
 import StatCard from '../../components/ui/StatCard';
 import { IconBuilding, IconBox, IconWorld } from '@tabler/icons-react';
 import Spinner from '../../components/Spinner';
@@ -35,10 +35,10 @@ const DashboardPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-10 animate-fade-in">
+    <Container size="xl" px="md">
       <div>
-        <h1 className="text-4xl font-bold text-text-primary">Dashboard</h1>
-        <p className="text-text-secondary mt-2 text-lg">
+        <h1>Dashboard</h1>
+        <p>
           Welcome back! Here's a snapshot of your asset ecosystem.
         </p>
       </div>
@@ -84,7 +84,7 @@ const DashboardPage: React.FC = () => {
           </Grid.Col>
         </Grid>
       </Card>
-    </div>
+    </Container>
   );
 };
 
