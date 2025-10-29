@@ -4,9 +4,9 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import Button from '../components/Button';
 import logo from '../assets/logo.png';
-import { Image, Hidden, Drawer, Burger } from '@mantine/core';
+import { Image, Drawer, Burger } from '@mantine/core';
 import {
-  IconTachometer,
+  IconDashboard,
   IconBuilding,
   IconBox,
   IconLogout,
@@ -35,16 +35,38 @@ const DashboardLayout: React.FC = () => {
     await supabase.auth.signOut();
   };
 
-  const baseLink = "flex items-center justify-between text-neutral-500 rounded-lg hover:bg-primary-light hover:text-primary transition-all duration-200";
-  const linkStyles = `${baseLink} py-3 px-4`;
-  const collapsedLinkStyles = `${baseLink} h-12 w-12 justify-center`;
-  const activeLinkStyles = "bg-gradient-to-r from-primary to-blue-400 text-white font-semibold shadow-lg shadow-primary/30";
+  const linkStyles = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    color: 'var(--mantine-color-gray-7)',
+    borderRadius: 'var(--mantine-radius-md)',
+    padding: '0.75rem 1rem',
+    transition: 'all 200ms ease',
+    '&:hover': {
+      backgroundColor: 'var(--mantine-color-primary-light)',
+      color: 'var(--mantine-color-primary)',
+    },
+  };
+
+  const collapsedLinkStyles = {
+    ...linkStyles,
+    height: '3rem',
+    width: '3rem',
+    justifyContent: 'center',
+  };
+
+  const activeLinkStyles = {
+    backgroundImage: 'linear-gradient(to right, var(--mantine-color-primary-6), var(--mantine-color-blue-4))',
+    color: 'white',
+    fontWeight: 600,
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+  };
 
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--mantine-color-body)', color: 'var(--mantine-color-text)' }}>
       {/* Sidebar */}
-      <Hidden smDown>
-        <aside style={{ transition: 'width 300ms ease-in-out', backgroundColor: 'var(--mantine-color-body)', borderRight: '1px solid var(--mantine-color-border)', display: 'flex', flexDirection: 'column', width: isCollapsed ? '6rem' : '18rem' }}>
+      <aside style={{ transition: 'width 300ms ease-in-out', backgroundColor: 'var(--mantine-color-body)', borderRight: '1px solid var(--mantine-color-border)', display: 'flex', flexDirection: 'column', width: isCollapsed ? '6rem' : '18rem', ['@media (max-width: 768px)']: { display: 'none' } }}>
           <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center' }}>
             <Image src={logo} alt="Company Logo" h={40} fit="contain" />
           {!isCollapsed && <span style={{ marginLeft: '1rem', fontSize: '1.25rem', fontWeight: 'bold' }}>Your App</span>}
@@ -55,7 +77,7 @@ const DashboardLayout: React.FC = () => {
 
         <nav style={{ flex: '1', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {[
-            { to: "/", icon: IconTachometer, label: "Dashboard" },
+            { to: "/", icon: IconDashboard, label: "Dashboard" },
             { to: "/estates", icon: IconBuilding, label: "Estates", badge: 15 },
             { to: "/buildings", icon: IconBuilding, label: "Buildings" },
             { to: "/items", icon: IconBox, label: "Items", badge: 248 },
@@ -91,7 +113,6 @@ const DashboardLayout: React.FC = () => {
           </div>
         </div>
       </aside>
-      </Hidden>
 
       {/* Main Content */}
       <div style={{ flex: '1', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'margin-left 300ms ease-in-out', marginLeft: isCollapsed ? '6rem' : '18rem' }}>
@@ -110,7 +131,7 @@ const DashboardLayout: React.FC = () => {
       >
         <nav style={{ flex: '1', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {[
-            { to: "/", icon: IconTachometer, label: "Dashboard" },
+            { to: "/", icon: IconDashboard, label: "Dashboard" },
             { to: "/estates", icon: IconBuilding, label: "Estates", badge: 15 },
             { to: "/buildings", icon: IconBuilding, label: "Buildings" },
             { to: "/items", icon: IconBox, label: "Items", badge: 248 },
