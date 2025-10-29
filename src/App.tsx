@@ -16,7 +16,6 @@ import AuditLogsPage from './pages/audit/AuditLogsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './router/ProtectedRoute';
 import MainLayout from './layout/MainLayout';
-import Toast from './components/Toast';
 import { useAuth } from './hooks/useAuth';
 import { Loader, Center } from '@mantine/core';
 
@@ -28,10 +27,8 @@ const App: React.FC = () => {
   }
 
   return (
-    <>
-      <Toast />
-      <Routes>
-        <Route path="/login" element={session ? <Navigate to="/" /> : <LoginPage />} />
+    <Routes>
+      <Route path="/login" element={session ? <Navigate to="/" /> : <LoginPage />} />
         <Route path="/" element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route index element={<DashboardPage />} />
