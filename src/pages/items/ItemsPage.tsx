@@ -139,8 +139,8 @@ const ItemsPage: React.FC = () => {
     return items
       .filter(item =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (estateFilter === '' || item.buildings?.estates?.id === parseInt(estateFilter, 10)) &&
-        (buildingFilter === '' || item.building_id === parseInt(buildingFilter, 10))
+        (estateFilter === '' || item.buildings?.estates?.id === estateFilter) &&
+        (buildingFilter === '' || item.building_id === buildingFilter)
       )
       .sort((a, b) => {
         if (sortBy === 'name') {

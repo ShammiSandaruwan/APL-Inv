@@ -16,12 +16,12 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend, color = 
 
   return (
     <Card withBorder p="lg" radius="md">
-      <Group position="apart">
+      <Group justify="space-between">
         <div>
-          <Text color="dimmed" transform="uppercase" weight={700} size="xs">
+          <Text c="dimmed" tt="uppercase" fw={700} size="xs">
             {title}
           </Text>
-          <Text weight={700} size="xl">
+          <Text fw={700} size="xl">
             {value}
           </Text>
         </div>
@@ -30,12 +30,12 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, trend, color = 
         </ThemeIcon>
       </Group>
       {trend && (
-        <Group spacing="xs" mt="md">
+        <Group mt="md">
           <TrendIcon size={16} style={{ color: trend === 'up' ? 'teal' : 'red' }} />
-          <Text color={trend === 'up' ? 'teal' : 'red'} size="sm" weight={500}>
+          <Text c={trend === 'up' ? 'teal' : 'red'} size="sm" fw={500}>
             +15%
           </Text>
-          <Text size="sm" color="dimmed">
+          <Text size="sm" c="dimmed">
             vs last month
           </Text>
         </Group>

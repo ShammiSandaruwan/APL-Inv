@@ -122,7 +122,7 @@ const BuildingsPage: React.FC = () => {
     return buildings
       .filter(building =>
         building.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (estateFilter === '' || building.estate_id === parseInt(estateFilter, 10)) &&
+        (estateFilter === '' || building.estate_id === estateFilter) &&
         (typeFilter === '' || building.building_type === typeFilter)
       )
       .sort((a, b) => {

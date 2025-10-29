@@ -1,4 +1,4 @@
-// src/pages/estates/EstatesPage.tsx
+// src/pag../../types.tsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
@@ -12,18 +12,8 @@ import Table from '../../components/Table';
 import Input from '../../components/Input';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import { FaPlus, FaPencilAlt, FaTrash, FaEye } from 'react-icons/fa';
+import type { Estate } from '../../types';
 import { useAuth } from '../../hooks/useAuth';
-
-// Define the type for an estate object
-export type Estate = {
-  id: string;
-  name: string;
-  code: string;
-  location: string;
-  description: string;
-  is_active: boolean;
-  created_at: string;
-};
 
 const EstatesPage: React.FC = () => {
   const [estates, setEstates] = useState<Estate[]>([]);
@@ -122,7 +112,7 @@ const EstatesPage: React.FC = () => {
         if (sortBy === 'name') {
           return a.name.localeCompare(b.name);
         } else if (sortBy === 'date') {
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
         }
         return 0;
       });

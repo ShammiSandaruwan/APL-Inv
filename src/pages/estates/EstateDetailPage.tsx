@@ -1,11 +1,11 @@
 // src/pages/estates/EstateDetailPage.tsx
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
+import Spinner from '../../components/Spinner';
 import { showErrorToast } from '../../utils/toast';
-import type { Estate } from './EstatesPage';
+import type { Estate } from '../../types';
 import type { Building } from '../../types';
-import { Loader, Center, Title, Paper, Text, SimpleGrid, Card } from '@mantine/core';
 
 const EstateDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -49,46 +49,39 @@ const EstateDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Center style={{ height: '100%' }}>
-        <Loader />
-      </Center>
+      <div className="flex justify-center items-center h-full">
+        <Spinner />
+      </div>
     );
   }
 
   if (!estate) {
-    return <Text>Estate not found.</Text>;
+    return <p>Estate not found.</p>;
   }
 
   return (
     <div>
-      <Title order={2} mb="lg">{estate.name}</Title>
-      <Paper withBorder shadow="sm" p="lg" mb="xl">
-        <Title order={4} mb="md">Details</Title>
-        <Text><strong>Code:</strong> {estate.code}</Text>
-        <Text><strong>Location:</strong> {estate.location}</Text>
-        <Text><strong>Description:</strong> {estate.description}</Text>
-      </Paper>
+      <h1 className="text-3xl font-bold mb-4">{estate.name}</h1>
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+        <h2 className="text-xl font-semibold mb-4">Details</h2>
+        <p><strong>Code:</strong> {estate.code}</p>
+        <p><strong>Location:</strong> {estate.location}</p>
+        <p><strong>Description:</strong> {estate.description}</p>
+      </div>
 
-      <Title order={3} mb="lg">Buildings in this Estate</Title>
+      <h2 className="text-2xl font-semibold mb-4">Buildings in this Estate</h2>
       {buildings.length === 0 ? (
-        <Text>No buildings found in this estate.</Text>
+        <p>No buildings found in this estate.</p>
       ) : (
-        <SimpleGrid
-          cols={3}
-          spacing="lg"
-          breakpoints={[
-            { maxWidth: 'md', cols: 2 },
-            { maxWidth: 'sm', cols: 1 },
-          ]}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {buildings.map(building => (
-            <Card withBorder shadow="sm" key={building.id}>
-              <Title order={5}>{building.name}</Title>
-              <Text><strong>Code:</strong> {building.code}</Text>
-              <Text><strong>Type:</strong> {building.building_type}</Text>
-            </Card>
+            <div key={building.id} className="bg-white p-4 rounded-lg shadow-md">
+              <h3 className="text-lg font-bold">{building.name}</h3>
+              <p><strong>Code:</strong> {building.code}</p>
+              <p><strong>Type:</strong> {building.building_type}</p>
+            </div>
           ))}
-        </SimpleGrid>
+        </div>
       )}
     </div>
   );

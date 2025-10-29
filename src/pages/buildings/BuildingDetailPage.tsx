@@ -1,10 +1,11 @@
 // src/pages/buildings/BuildingDetailPage.tsx
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabaseClient';
+import Spinner from '../../components/Spinner';
 import { showErrorToast } from '../../utils/toast';
-import type { Building, Item } from '../../types';
-import { Loader, Center, Title, Paper, Text, SimpleGrid, Card } from '@mantine/core';
+import type { Building } from '../../types';
+import type { Item } from '../../types';
 
 const BuildingDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -48,45 +49,38 @@ const BuildingDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Center style={{ height: '100%' }}>
-        <Loader />
-      </Center>
+      <div className="flex justify-center items-center h-full">
+        <Spinner />
+      </div>
     );
   }
 
   if (!building) {
-    return <Text>Building not found.</Text>;
+    return <p>Building not found.</p>;
   }
 
   return (
     <div>
-      <Title order={2} mb="lg">{building.name}</Title>
-      <Paper withBorder shadow="sm" p="lg" mb="xl">
-        <Title order={4} mb="md">Details</Title>
-        <Text><strong>Code:</strong> {building.code}</Text>
-        <Text><strong>Estate:</strong> {building.estates?.name}</Text>
-        <Text><strong>Type:</strong> {building.building_type}</Text>
-      </Paper>
+      <h1 className="text-3xl font-bold mb-4">{building.name}</h1>
+      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+        <h2 className="text-xl font-semibold mb-4">Details</h2>
+        <p><strong>Code:</strong> {building.code}</p>
+        <p><strong>Estate:</strong> {building.estates?.name}</p>
+        <p><strong>Type:</strong> {building.building_type}</p>
+      </div>
 
-      <Title order={3} mb="lg">Items in this Building</Title>
+      <h2 className="text-2xl font-semibold mb-4">Items in this Building</h2>
       {items.length === 0 ? (
-        <Text>No items found in this building.</Text>
+        <p>No items found in this building.</p>
       ) : (
-        <SimpleGrid
-          cols={3}
-          spacing="lg"
-          breakpoints={[
-            { maxWidth: 'md', cols: 2 },
-            { maxWidth: 'sm', cols: 1 },
-          ]}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map(item => (
-            <Card withBorder shadow="sm" key={item.id}>
-              <Title order={5}>{item.name}</Title>
-              <Text><strong>Code:</strong> {item.item_code}</Text>
-            </Card>
+            <div key={item.id} className="bg-white p-4 rounded-lg shadow-md">
+              <h3 className="text-lg font-bold">{item.name}</h3>
+              <p><strong>Code:</strong> {item.item_code}</p>
+            </div>
           ))}
-        </SimpleGrid>
+        </div>
       )}
     </div>
   );
