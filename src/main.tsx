@@ -14,9 +14,10 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <MantineProvider
         theme={{
+          spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 },
+          defaultRadius: "md",
           primaryColor: 'blue',
           fontFamily: 'Inter, sans-serif',
-          defaultRadius: 'md',
           colors: {
             blue: [
               '#e7f5ff',
@@ -59,7 +60,16 @@ createRoot(document.getElementById('root')!).render(
             backgroundColor: '#F8FAFC',
             textColor: '#1A202C',
           },
+          components: {
+            Button: {
+              defaultProps: {
+                size: 'md',
+              },
+            },
+          },
         }}
+        withGlobalStyles
+        withNormalizeCSS
       >
         <Notifications />
         <AuthProvider>

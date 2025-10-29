@@ -1,73 +1,109 @@
 // src/pages/auth/LoginPage.tsx
-import React, { useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
-import Button from '../../components/Button';
-import Input from '../../components/Input';
-import { showErrorToast, showSuccessToast } from '../../utils/toast';
+import {
+  Anchor,
+  Button,
+  Container,
+  Group,
+  Image,
+  Paper,
+  PasswordInput,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import logo from '../../assets/logo.png';
+import { supabase } from '../../lib/supabaseClient';
+import { showErrorToast, showSuccessToast } from '../../utils/toast';
 
-const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const form = useForm({
+    initialValues: {
+      email: '',
+      password: '',
+    },
+    validate: {
+      email: (val) => (/^\\S+@\\S+$/.test(val) ? null : 'Invalid email'),
+      password: (val) =>
+        val.length <= 6
+          ? 'Password should include at least 6 characters'
+          : null,
+    },
+  });
+
+  const handleLogin = async (values: typeof form.values) => {
     setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      showErrorToast(error.message);
-    } else {
-      showSuccessToast('Logged in successfully!');
-      // The user will be redirected to the dashboard by the router logic
+      if (error) {
+        showErrorToast(error.message);
+      } else {
+        showSuccessToast('Logged in successfully!');
+        // The router will handle redirection
+      }
+    } catch (error: any) {
+      showErrorToast(error.message || 'An unexpected error occurred.');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gin px-4">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <div className="flex flex-col items-center text-center">
-          <img src={logo} alt="Company Logo" className="w-32 mb-4" />
-          <h1 className="text-2xl font-bold text-mine-shaft">
-            Estate Asset Management
-          </h1>
-        </div>
-        <form onSubmit={handleLogin} className="space-y-6">
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            label="Email Address"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            label="Password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <div>
-            <Button type="submit" className="w-full" isLoading={isLoading}>
-              Sign In
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
+    <Container size={420} my={40}>
+      <Stack align="center" justify="center" gap="md">
+        <Image src={logo} alt="Company Logo" w={100} />
+        <Title ta="center">Estate Asset Management</Title>
+      </Stack>
 
-export default LoginPage;
+      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+        <form onSubmit={form.onSubmit(handleLogin)}>
+          <Stack>
+            <TextInput
+              required
+              label="Email"
+              placeholder="superadmin@example.com"
+              value={form.values.email}
+              onChange={(event) =>
+                form.setFieldValue('email', event.currentTarget.value)
+              }
+              error={form.errors.email}
+              radius="md"
+            />
+
+            <PasswordInput
+              required
+              label="Password"
+              placeholder="Your password"
+              value={form.values.password}
+              onChange={(event) =>
+                form.setFieldValue('password', event.currentTarget.value)
+              }
+              error={form.errors.password}
+              radius="md"
+            />
+          </Stack>
+
+          <Group justify="space-between" mt="lg">
+            {/* Additional links can go here if needed */}
+            <Anchor component={Link} to="#" size="sm">
+              Forgot password?
+            </Anchor>
+          </Group>
+
+          <Button type="submit" fullWidth mt="xl" loading={isLoading}>
+            Sign In
+          </Button>
+        </form>
+      </Paper>
+    </Container>
+  );
+}
