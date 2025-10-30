@@ -10,9 +10,7 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
-  IconBox,
   IconBuilding,
-  IconCategory,
   IconClock,
   IconDashboard,
   IconFileText,
