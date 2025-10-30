@@ -27,7 +27,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     );
     const { data: { user }, error: userError } = await supabaseUserClient.auth.getUser();
 
-
     if (userError || !user) {
       return res.status(401).json({ error: 'Invalid or expired token.' });
     }
