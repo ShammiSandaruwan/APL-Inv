@@ -30,6 +30,18 @@ const theme = createTheme({
   headings: {
     fontFamily: 'Inter, sans-serif',
   },
+  components: {
+    NavLink: {
+      styles: (theme) => ({
+        root: {
+          '&:hover': {
+            backgroundColor: theme.colors.indigo[5],
+            color: theme.white,
+          },
+        },
+      }),
+    },
+  },
 });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

@@ -85,9 +85,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     // Fetch initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      fetchSessionAndProfile(session);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        fetchSessionAndProfile(session);
+      })
+      .catch((error) => {
+        console.error('Error getting session:', error);
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
 
     // Subscribe to auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {

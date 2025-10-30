@@ -50,6 +50,7 @@ const DashboardPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchStats = async () => {
       setIsLoading(true);
       try {
@@ -66,18 +67,26 @@ const DashboardPage: React.FC = () => {
         if (estatesError || buildingsError || itemsError) {
           throw new Error('Failed to load dashboard statistics.');
         }
-        setStats({
-          estates: estatesCount || 0,
-          buildings: buildingsCount || 0,
-          items: itemsCount || 0,
-        });
+
+        if (isMounted) {
+          setStats({
+            estates: estatesCount || 0,
+            buildings: buildingsCount || 0,
+            items: itemsCount || 0,
+          });
+        }
       } catch (error: any) {
         showErrorToast(error.message);
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
     fetchStats();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (isLoading) {

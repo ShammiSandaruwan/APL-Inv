@@ -30,7 +30,7 @@ import { supabase } from '../lib/supabaseClient';
 import Header from './Header';
 
 const navLinks = [
-  { to: '/dashboard', label: 'Dashboard', icon: IconDashboard },
+  { to: '/', label: 'Dashboard', icon: IconDashboard },
   { to: '/estates', label: 'Estates', icon: IconBuilding },
   { to: '/buildings', label: 'Buildings', icon: IconBuilding },
   { to: '/items', label: 'Items', icon: IconBox },
@@ -94,34 +94,37 @@ const DashboardLayout: React.FC = () => {
       <AppShell.Navbar
         p="md"
         style={{
-          backgroundColor: theme.colors.indigo[7],
-          color: theme.white,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          background: 'linear-gradient(180deg, #1e40af 0%, #2563eb 100%)',
+          color: 'white',
         }}
       >
-        <Stack justify="space-between" style={{ height: '100%' }}>
-          <div>
-            <Group>
-              <Image src={logo} alt="Company Logo" w={40} />
-              <Title order={4} c="white">
-                Asset Manager
-              </Title>
-            </Group>
-            <Stack mt="md">{links}</Stack>
-          </div>
-          <Stack>
-            <Text c="white" size="sm">
-              {profile?.full_name}
+        <div>
+          <Group mb="xl" gap="xs">
+            <Image src={logo} width={32} height={32} radius="sm" alt="Logo" />
+            <Text fw={600} c="white">
+              Asset Manager
             </Text>
-            <Button
-              onClick={handleLogout}
-              variant="light"
-              color="gray"
-              leftSection={<IconLogout size={16} />}
-            >
-              Logout
-            </Button>
-          </Stack>
-        </Stack>
+          </Group>
+          {links}
+        </div>
+
+        <div>
+          <Text size="sm" fw={500} mb="xs" ta="center" c="white">
+            {profile?.full_name || 'Super Admin'}
+          </Text>
+          <Button
+            fullWidth
+            variant="light"
+            color="red"
+            leftSection={<IconLogout size={16} />}
+            onClick={handleLogout}
+          >
+            Logout
+          </Button>
+        </div>
       </AppShell.Navbar>
 
       <AppShell.Main>

@@ -22,6 +22,7 @@ const EstateDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchEstateDetails = async () => {
       if (!id) return;
       setIsLoading(true);
@@ -33,22 +34,25 @@ const EstateDetailPage: React.FC = () => {
           .eq('id', id)
           .single();
         if (estateError) throw estateError;
-        setEstate(estateData as Estate);
+        if (isMounted) setEstate(estateData as Estate);
 
         const { data: buildingsData, error: buildingsError } = await supabase
           .from('buildings')
           .select('*')
           .eq('estate_id', id);
         if (buildingsError) throw buildingsError;
-        setBuildings(buildingsData as Building[]);
+        if (isMounted) setBuildings(buildingsData as Building[]);
       } catch (error: any) {
         showErrorToast(error.message || 'Failed to fetch estate details.');
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchEstateDetails();
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   if (isLoading) {

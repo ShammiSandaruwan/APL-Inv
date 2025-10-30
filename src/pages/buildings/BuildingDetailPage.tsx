@@ -14,6 +14,7 @@ const BuildingDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchBuildingDetails = async () => {
       if (!id) return;
       setIsLoading(true);
@@ -26,7 +27,7 @@ const BuildingDetailPage: React.FC = () => {
 
       if (buildingError) {
         showErrorToast(buildingError.message);
-      } else {
+      } else if (isMounted) {
         setBuilding(buildingData as Building);
       }
 
@@ -37,14 +38,17 @@ const BuildingDetailPage: React.FC = () => {
 
       if (itemsError) {
         showErrorToast(itemsError.message);
-      } else {
+      } else if (isMounted) {
         setItems(itemsData as Item[]);
       }
 
-      setIsLoading(false);
+      if (isMounted) setIsLoading(false);
     };
 
     fetchBuildingDetails();
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   if (isLoading) {

@@ -22,6 +22,7 @@ const ItemDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchItemDetails = async () => {
       if (!id) return;
       setIsLoading(true);
@@ -32,14 +33,17 @@ const ItemDetailPage: React.FC = () => {
           .eq('id', id)
           .single();
         if (error) throw error;
-        setItem(data as Item);
+        if (isMounted) setItem(data as Item);
       } catch (error: any) {
         showErrorToast(error.message || 'Failed to fetch item details.');
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
     fetchItemDetails();
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   if (isLoading) {
