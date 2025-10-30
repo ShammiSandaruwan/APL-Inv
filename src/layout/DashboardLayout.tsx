@@ -6,10 +6,7 @@ import {
   Group,
   Image,
   NavLink,
-  Stack,
-  Text,
-  Title,
-  useMantineTheme,
+  Text
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -43,7 +40,6 @@ const navLinks = [
 const DashboardLayout: React.FC = () => {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
-  const theme = useMantineTheme();
   const location = useLocation();
   const { profile } = useAuth();
 
