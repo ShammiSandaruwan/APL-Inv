@@ -1,7 +1,6 @@
 // src/layout/DashboardLayout.tsx
 import {
   AppShell,
-  Burger,
   Button,
   Group,
   Image,
@@ -57,7 +56,6 @@ const DashboardLayout: React.FC = () => {
       leftSection={<link.icon size={18} />}
       active={location.pathname === link.to}
       onClick={closeMobile} // Auto-close sidebar on mobile
-      variant="filled"
     />
   ));
 
@@ -73,19 +71,12 @@ const DashboardLayout: React.FC = () => {
     >
       <AppShell.Header>
         <Group h="100%" px="md">
-          <Burger
-            opened={mobileOpened}
-            onClick={toggleMobile}
-            hiddenFrom="sm"
-            size="sm"
+          <Header
+            mobileOpened={mobileOpened}
+            desktopOpened={desktopOpened}
+            toggleMobile={toggleMobile}
+            toggleDesktop={toggleDesktop}
           />
-          <Burger
-            opened={desktopOpened}
-            onClick={toggleDesktop}
-            visibleFrom="sm"
-            size="sm"
-          />
-          <Header />
         </Group>
       </AppShell.Header>
 
