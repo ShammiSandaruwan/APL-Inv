@@ -10,6 +10,7 @@ import {
   Tooltip,
 } from '@mantine/core';
 import {
+  IconBuilding,
   IconPencil,
   IconPlus,
   IconTrash,
@@ -22,6 +23,7 @@ import { supabase } from '../../lib/supabaseClient';
 import type { UserProfile } from '../../types';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import AddUserModal from './AddUserModal';
+import AssignEstateModal from './AssignEstateModal';
 import EditUserModal from './EditUserModal';
 
 const UserManagementPage: React.FC = () => {
@@ -30,6 +32,7 @@ const UserManagementPage: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const { session } = useAuth();
 
@@ -135,6 +138,18 @@ const UserManagementPage: React.FC = () => {
             textAlign: 'right',
             render: (user: UserProfile) => (
               <Group gap="xs" justify="flex-end">
+                <Tooltip label="Assign Estate">
+                  <ActionIcon
+                    variant="subtle"
+                    color="teal"
+                    onClick={() => {
+                      setSelectedUser(user);
+                      setIsAssignModalOpen(true);
+                    }}
+                  >
+                    <IconBuilding size={16} />
+                  </ActionIcon>
+                </Tooltip>
                 <Tooltip label="Edit User">
                   <ActionIcon
                     variant="subtle"
@@ -176,6 +191,12 @@ const UserManagementPage: React.FC = () => {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onSuccess={fetchUsers}
+        user={selectedUser}
+      />
+
+      <AssignEstateModal
+        isOpen={isAssignModalOpen}
+        onClose={() => setIsAssignModalOpen(false)}
         user={selectedUser}
       />
 
