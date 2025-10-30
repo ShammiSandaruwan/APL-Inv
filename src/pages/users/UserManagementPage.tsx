@@ -12,79 +12,72 @@ import {
 import {
   IconPencil,
   IconPlus,
-  IconShield,
   IconTrash,
 } from '@tabler/icons-react';
 import { DataTable } from 'mantine-datatable';
 import React, { useEffect, useState } from 'react';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabaseClient';
 import type { UserProfile } from '../../types';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
 import AddUserModal from './AddUserModal';
 import EditUserModal from './EditUserModal';
-import PermissionsModal from './PermissionsModal';
 
 const UserManagementPage: React.FC = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
+  const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { session } = useAuth();
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchUsers = async () => {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase.from('user_profiles').select('*');
-        if (error) throw error;
-        if (isMounted) setUsers(data as UserProfile[]);
-      } catch (error: any) {
-        showErrorToast(error.message || 'Failed to fetch users.');
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-    fetchUsers();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const handleUpdateUser = async (updatedUser: UserProfile) => {
-    setIsSubmitting(true);
+  const fetchUsers = async () => {
+    setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .update({ role: updatedUser.role })
-        .eq('id', updatedUser.id)
-        .select()
-        .single();
+      const { data, error } = await supabase.from('user_profiles').select('*');
       if (error) throw error;
-      setUsers(
-        users.map((u) => (u.id === updatedUser.id ? (data as UserProfile) : u))
-      );
-      showSuccessToast('User role updated successfully!');
-      setIsEditModalOpen(false);
-      setSelectedUser(null);
+      setUsers(data as UserProfile[]);
     } catch (error: any) {
-      showErrorToast(error.message || 'Failed to update user role.');
+      showErrorToast(error.message || 'Failed to fetch users.');
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
-  const handleDeleteUser = async () => {
-    if (!selectedUser) return;
-    showErrorToast(
-      'User deletion via the dashboard is disabled for security. Please manage users in the Supabase console.'
-    );
-    setIsDeleteModalOpen(false);
-    setSelectedUser(null);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleDeactivateUser = async () => {
+    if (!selectedUser || !session) {
+        showErrorToast('You must be logged in to deactivate a user.');
+        return;
+    }
+
+    try {
+      const response = await fetch('/api/deactivate-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ id: selectedUser.id }),
+      });
+
+      if (!response.ok) {
+        const { error } = await response.json();
+        throw new Error(error);
+      }
+
+      showSuccessToast('User deactivated successfully!');
+      fetchUsers(); // Refresh the list
+      setIsDeactivateModalOpen(false);
+      setSelectedUser(null);
+    } catch (error: any) {
+      showErrorToast(error.message || 'Failed to deactivate user.');
+    }
   };
 
   if (isLoading) {
@@ -99,7 +92,7 @@ const UserManagementPage: React.FC = () => {
           leftSection={<IconPlus size={16} />}
           onClick={() => setIsAddModalOpen(true)}
         >
-          Add User
+          Add New User
         </Button>
       </Group>
 
@@ -118,14 +111,20 @@ const UserManagementPage: React.FC = () => {
             render: ({ role }: UserProfile) => (
               <Badge
                 color={
-                  role === 'super_admin'
-                    ? 'red'
-                    : role === 'co_admin'
-                    ? 'orange'
-                    : 'gray'
+                  role === 'super_admin' ? 'red' : role === 'co_admin' ? 'orange' : 'gray'
                 }
               >
                 {role.replace(/_/g, ' ')}
+              </Badge>
+            ),
+            sortable: true,
+          },
+          {
+            accessor: 'is_active',
+            title: 'Status',
+            render: ({ is_active }: UserProfile) => (
+              <Badge color={is_active ? 'green' : 'gray'}>
+                {is_active ? 'Active' : 'Inactive'}
               </Badge>
             ),
             sortable: true,
@@ -136,21 +135,7 @@ const UserManagementPage: React.FC = () => {
             textAlign: 'right',
             render: (user: UserProfile) => (
               <Group gap="xs" justify="flex-end">
-                {user.role === 'co_admin' && (
-                  <Tooltip label="Permissions">
-                    <ActionIcon
-                      variant="subtle"
-                      color="teal"
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setIsPermissionsModalOpen(true);
-                      }}
-                    >
-                      <IconShield size={16} />
-                    </ActionIcon>
-                  </Tooltip>
-                )}
-                <Tooltip label="Edit Role">
+                <Tooltip label="Edit User">
                   <ActionIcon
                     variant="subtle"
                     color="blue"
@@ -162,14 +147,15 @@ const UserManagementPage: React.FC = () => {
                     <IconPencil size={16} />
                   </ActionIcon>
                 </Tooltip>
-                <Tooltip label="Delete User">
+                <Tooltip label="Deactivate User">
                   <ActionIcon
                     variant="subtle"
                     color="red"
                     onClick={() => {
                       setSelectedUser(user);
-                      setIsDeleteModalOpen(true);
+                      setIsDeactivateModalOpen(true);
                     }}
+                    disabled={!user.is_active}
                   >
                     <IconTrash size={16} />
                   </ActionIcon>
@@ -183,29 +169,23 @@ const UserManagementPage: React.FC = () => {
       <AddUserModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-      />
-
-      <PermissionsModal
-        isOpen={isPermissionsModalOpen}
-        onClose={() => setIsPermissionsModalOpen(false)}
-        user={selectedUser}
+        onSuccess={fetchUsers}
       />
 
       <EditUserModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        onUpdateUser={handleUpdateUser}
+        onSuccess={fetchUsers}
         user={selectedUser}
-        isLoading={isSubmitting}
       />
 
       {selectedUser && (
         <ConfirmationModal
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          onConfirm={handleDeleteUser}
-          title="Delete User"
-          message={`Are you sure you want to delete "${selectedUser.full_name}"? This action is currently disabled.`}
+          isOpen={isDeactivateModalOpen}
+          onClose={() => setIsDeactivateModalOpen(false)}
+          onConfirm={handleDeactivateUser}
+          title="Deactivate User"
+          message={`Are you sure you want to deactivate "${selectedUser.full_name}"?`}
         />
       )}
     </Stack>

@@ -1,73 +1,110 @@
 // src/pages/users/EditUserModal.tsx
-import { Button, Group, Modal, Select, Stack } from '@mantine/core';
+import {
+  Button,
+  Modal,
+  Select,
+  Stack,
+  Switch,
+  TextInput,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 import type { UserProfile } from '../../types';
+import { showErrorToast, showSuccessToast } from '../../utils/toast';
 
 interface EditUserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpdateUser: (user: UserProfile) => void;
+  onSuccess: () => void;
   user: UserProfile | null;
-  isLoading: boolean;
 }
 
 const EditUserModal: React.FC<EditUserModalProps> = ({
   isOpen,
   onClose,
-  onUpdateUser,
+  onSuccess,
   user,
-  isLoading,
 }) => {
-  const form = useForm<{ role: UserProfile['role'] }>({
+  const [isLoading, setIsLoading] = useState(false);
+  const { session } = useAuth();
+  const form = useForm({
     initialValues: {
-      role: 'user', // Default to 'user' to avoid empty initial state
-    },
-    validate: {
-      role: (value) => (value ? null : 'A role must be selected'),
+      full_name: '',
+      role: 'estate_user',
+      is_active: true,
     },
   });
 
   useEffect(() => {
     if (user) {
-      form.setValues({ role: user.role });
+      form.setValues({
+        full_name: user.full_name,
+        role: user.role,
+        is_active: user.is_active,
+      });
     }
   }, [user]);
 
-  const handleSubmit = (values: { role: UserProfile['role'] }) => {
-    if (user) {
-      onUpdateUser({ ...user, role: values.role });
+  const handleSubmit = async (values: typeof form.values) => {
+    if (!user || !session) {
+        showErrorToast('You must be logged in to update a user.');
+        return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/update-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ id: user.id, ...values }),
+      });
+
+      if (!response.ok) {
+        const { error } = await response.json();
+        throw new Error(error);
+      }
+
+      showSuccessToast('User updated successfully!');
+      onSuccess();
+      onClose();
+    } catch (error: any) {
+      showErrorToast(error.message || 'Failed to update user.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Modal opened={isOpen} onClose={onClose} title="Edit User Role" centered>
+    <Modal opened={isOpen} onClose={onClose} title="Edit User">
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Stack gap="md">
+        <Stack>
+          <TextInput
+            label="Full Name"
+            placeholder="John Doe"
+            required
+            {...form.getInputProps('full_name')}
+          />
           <Select
             label="Role"
-            placeholder="Select a role"
-            required
             data={[
-              { value: 'super_admin', label: 'Super Admin' },
+              { value: 'estate_user', label: 'Estate User' },
               { value: 'co_admin', label: 'Co-Admin' },
-              { value: 'user', label: 'User' },
+              { value: 'super_admin', label: 'Super Admin' },
             ]}
+            required
             {...form.getInputProps('role')}
           />
-          <Group justify="flex-end" mt="md">
-            <Button
-              variant="outline"
-              color="gray"
-              onClick={onClose}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" loading={isLoading}>
-              Save Changes
-            </Button>
-          </Group>
+          <Switch
+            label="User is Active"
+            checked={form.values.is_active}
+            {...form.getInputProps('is_active', { type: 'checkbox' })}
+          />
+          <Button type="submit" loading={isLoading} fullWidth mt="md">
+            Save Changes
+          </Button>
         </Stack>
       </form>
     </Modal>
