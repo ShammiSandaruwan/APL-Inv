@@ -21,15 +21,20 @@ const ReportsPage: React.FC = () => {
   const [buildings, setBuildings] = useState<Building[]>([]);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchEstates = async () => {
       const { data, error } = await supabase.from('estates').select('*');
       if (error) showErrorToast(error.message);
-      else setEstates(data as Estate[]);
+      else if (isMounted) setEstates(data as Estate[]);
     };
     fetchEstates();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchBuildings = async () => {
       if (estateId) {
         const { data, error } = await supabase
@@ -37,12 +42,15 @@ const ReportsPage: React.FC = () => {
           .select('*')
           .eq('estate_id', estateId);
         if (error) showErrorToast(error.message);
-        else setBuildings(data as Building[]);
+        else if (isMounted) setBuildings(data as Building[]);
       } else {
-        setBuildings([]);
+        if (isMounted) setBuildings([]);
       }
     };
     fetchBuildings();
+    return () => {
+      isMounted = false;
+    };
   }, [estateId]);
 
   const generateReport = async () => {

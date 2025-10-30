@@ -22,19 +22,23 @@ const AuditLogsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchLogs = async () => {
       setIsLoading(true);
       const { data, error } = await supabase.from('audit_logs').select('*').order('created_at', { ascending: false });
 
       if (error) {
         showErrorToast(error.message);
-      } else {
+      } else if (isMounted) {
         setLogs(data as AuditLog[]);
       }
-      setIsLoading(false);
+      if (isMounted) setIsLoading(false);
     };
 
     fetchLogs();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const columns = [

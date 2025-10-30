@@ -58,6 +58,7 @@ const ItemsPage: React.FC = () => {
     permissions?.can_delete_items;
 
   useEffect(() => {
+    let isMounted = true;
     const fetchData = async () => {
       setIsLoading(true);
       try {
@@ -65,26 +66,29 @@ const ItemsPage: React.FC = () => {
           .from('items')
           .select('*, buildings(*, estates(*))');
         if (itemsError) throw itemsError;
-        setItems(itemsData as Item[]);
+        if (isMounted) setItems(itemsData as Item[]);
 
         const { data: estatesData, error: estatesError } = await supabase
           .from('estates')
           .select('*');
         if (estatesError) throw estatesError;
-        setEstates(estatesData as Estate[]);
+        if (isMounted) setEstates(estatesData as Estate[]);
 
         const { data: buildingsData, error: buildingsError } = await supabase
           .from('buildings')
           .select('*');
         if (buildingsError) throw buildingsError;
-        setBuildings(buildingsData as Building[]);
+        if (isMounted) setBuildings(buildingsData as Building[]);
       } catch (error: any) {
         showErrorToast(error.message || 'Failed to fetch page data.');
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
     fetchData();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleAddItem = (newItem: Item) => {

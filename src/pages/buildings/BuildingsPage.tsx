@@ -51,6 +51,7 @@ const BuildingsPage: React.FC = () => {
     (profile?.role === 'co_admin' && permissions?.can_manage_buildings);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchData = async () => {
       setIsLoading(true);
       try {
@@ -58,21 +59,24 @@ const BuildingsPage: React.FC = () => {
           .from('buildings')
           .select('*, estates(*)');
         if (buildingsError) throw buildingsError;
-        setBuildings(buildingsData as Building[]);
+        if (isMounted) setBuildings(buildingsData as Building[]);
 
         const { data: estatesData, error: estatesError } = await supabase
           .from('estates')
           .select('*');
         if (estatesError) throw estatesError;
-        setEstates(estatesData as Estate[]);
+        if (isMounted) setEstates(estatesData as Estate[]);
       } catch (error: any) {
         showErrorToast(error.message || 'Failed to fetch data.');
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchData();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleAddBuilding = (newBuilding: Building) => {

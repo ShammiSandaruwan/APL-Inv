@@ -47,19 +47,27 @@ const EstatesPage: React.FC = () => {
     (profile?.role === 'co_admin' && permissions?.can_manage_estates);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchEstates = async () => {
       setIsLoading(true);
       try {
         const { data, error } = await supabase.from('estates').select('*');
         if (error) throw error;
-        setEstates(data as Estate[]);
+        if (isMounted) {
+          setEstates(data as Estate[]);
+        }
       } catch (error: any) {
         showErrorToast(error.message || 'Failed to fetch estates.');
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
     fetchEstates();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleAddEstate = (newEstate: Estate) => {

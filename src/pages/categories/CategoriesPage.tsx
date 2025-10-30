@@ -29,19 +29,23 @@ const CategoriesPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchCategories = async () => {
       setIsLoading(true);
       try {
         const { data, error } = await supabase.from('categories').select('*');
         if (error) throw error;
-        setCategories(data as Category[]);
+        if (isMounted) setCategories(data as Category[]);
       } catch (error: any) {
         showErrorToast(error.message || 'Failed to fetch categories.');
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
     fetchCategories();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleAddCategory = async (

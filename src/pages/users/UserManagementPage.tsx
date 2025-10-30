@@ -36,19 +36,23 @@ const UserManagementPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchUsers = async () => {
       setIsLoading(true);
       try {
         const { data, error } = await supabase.from('user_profiles').select('*');
         if (error) throw error;
-        setUsers(data as UserProfile[]);
+        if (isMounted) setUsers(data as UserProfile[]);
       } catch (error: any) {
         showErrorToast(error.message || 'Failed to fetch users.');
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
     fetchUsers();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleUpdateUser = async (updatedUser: UserProfile) => {
