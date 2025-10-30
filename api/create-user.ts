@@ -12,7 +12,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // 1. Authorization check
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Authorization header is missing or invalid.' });
@@ -20,14 +19,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const jwt = authHeader.split(' ')[1];
 
     const supabaseUserClient = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!,
-  {
-    global: { headers: { Authorization: `Bearer ${jwt}` } },
-  }
-);
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_ANON_KEY!,
+      {
+        global: { headers: { Authorization: `Bearer ${jwt}` } },
+      }
+    );
+    const { data: { user }, error: userError } = await supabaseUserClient.auth.getUser();
 
-const { data: { user }, error: userError } = await supabaseUserClient.auth.getUser();
 
     if (userError || !user) {
       return res.status(401).json({ error: 'Invalid or expired token.' });
@@ -43,13 +42,11 @@ const { data: { user }, error: userError } = await supabaseUserClient.auth.getUs
       return res.status(403).json({ error: 'Forbidden: You do not have permission to perform this action.' });
     }
 
-    // 4. Proceed with user creation logic
     const { email, password, full_name, role } = req.body;
     if (!email || !password || !full_name || !role) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Always use the admin client for privileged actions
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
