@@ -59,9 +59,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .from('user_profiles')
       .insert({ id: authData.user.id, full_name, role });
     if (profileInsertError) {
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id); // Rollback
-      throw new Error(profileInsertError.message);
-    }
+  console.error('Profile Insert Error Details:', profileInsertError);
+  await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+  throw new Error(`Profile insert failed: ${profileInsertError.message}`);
+}
 
     return res.status(200).json({ id: authData.user.id, email: authData.user.email, full_name, role });
 
