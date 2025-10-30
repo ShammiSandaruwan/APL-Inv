@@ -34,8 +34,13 @@ const theme = createTheme({
     NavLink: {
       styles: (theme: MantineTheme) => ({
         root: {
+          color: theme.white,
           '&:hover': {
             backgroundColor: theme.colors.indigo[5],
+            color: theme.white,
+          },
+          '&[data-active="true"]': {
+            backgroundColor: theme.colors.indigo[6],
             color: theme.white,
           },
         },

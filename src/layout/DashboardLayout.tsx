@@ -6,22 +6,24 @@ import {
   Group,
   Image,
   NavLink,
-  Text
+  Text,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
   IconBox,
   IconBuilding,
   IconCategory,
+  IconClock,
   IconDashboard,
-  IconHistory,
+  IconFileText,
+  IconHome,
   IconLogout,
-  IconReport,
+  IconPackage,
+  IconTags,
   IconUsers,
 } from '@tabler/icons-react';
 import React from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import logo from '../assets/logo.png';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabaseClient';
 import Header from './Header';
@@ -29,22 +31,23 @@ import Header from './Header';
 const navLinks = [
   { to: '/', label: 'Dashboard', icon: IconDashboard },
   { to: '/estates', label: 'Estates', icon: IconBuilding },
-  { to: '/buildings', label: 'Buildings', icon: IconBuilding },
-  { to: '/items', label: 'Items', icon: IconBox },
-  { to: '/categories', label: 'Categories', icon: IconCategory },
+  { to: '/buildings', label: 'Buildings', icon: IconHome },
+  { to: '/items', label: 'Items', icon: IconPackage },
+  { to: '/categories', label: 'Categories', icon: IconTags },
   { to: '/users', label: 'Users', icon: IconUsers },
-  { to: '/reports', label: 'Reports', icon: IconReport },
-  { to: '/audit-logs', label: 'Audit Logs', icon: IconHistory },
+  { to: '/reports', label: 'Reports', icon: IconFileText },
+  { to: '/audit-logs', label: 'Audit Logs', icon: IconClock },
 ];
 
 const DashboardLayout: React.FC = () => {
-  const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
+  const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure();
   const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true);
   const location = useLocation();
   const { profile } = useAuth();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    window.location.href = '/login';
   };
 
   const links = navLinks.map((link) => (
@@ -53,8 +56,9 @@ const DashboardLayout: React.FC = () => {
       component={Link}
       to={link.to}
       label={link.label}
-      leftSection={<link.icon size="1rem" stroke={1.5} />}
+      leftSection={<link.icon size={18} />}
       active={location.pathname === link.to}
+      onClick={closeMobile} // Auto-close sidebar on mobile
       variant="filled"
     />
   ));
@@ -93,22 +97,31 @@ const DashboardLayout: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          background: 'linear-gradient(180deg, #1e40af 0%, #2563eb 100%)',
-          color: 'white',
+          background: 'linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%)',
         }}
       >
         <div>
-          <Group mb="xl" gap="xs">
-            <Image src={logo} width={32} height={32} radius="sm" alt="Logo" />
-            <Text fw={600} c="white">
+          {/* Logo Section */}
+          <Group justify="center" align="center" mb="xl">
+            <Image
+              src="/APLLogo.png"
+              width={40}
+              height={44}
+              fit="contain"
+              alt="APL Logo"
+            />
+            <Text fw={600} size="lg" ml="xs" c="white">
               Asset Manager
             </Text>
           </Group>
+
+          {/* Navigation */}
           {links}
         </div>
 
+        {/* Bottom Section */}
         <div>
-          <Text size="sm" fw={500} mb="xs" ta="center" c="white">
+          <Text ta="center" size="sm" mb="xs" c="white">
             {profile?.full_name || 'Super Admin'}
           </Text>
           <Button
