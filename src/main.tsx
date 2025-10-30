@@ -8,7 +8,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { AuthProvider } from './hooks/useAuth';
 import './index.css';
-import { MantineProvider, createTheme } from '@mantine/core';
+import { MantineProvider, createTheme, MantineTheme } from '@mantine/core';
 
 const theme = createTheme({
   primaryColor: 'indigo',
@@ -32,7 +32,7 @@ const theme = createTheme({
   },
   components: {
     NavLink: {
-      styles: (theme) => ({
+      styles: (theme: MantineTheme) => ({
         root: {
           '&:hover': {
             backgroundColor: theme.colors.indigo[5],
