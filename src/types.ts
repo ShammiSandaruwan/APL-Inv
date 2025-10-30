@@ -47,7 +47,8 @@ export interface Item extends BaseRecord {
 
 export interface UserProfile extends BaseRecord {
   full_name: string;
-  role: 'super_admin' | 'co_admin' | 'user';
+  role: 'super_admin' | 'co_admin' | 'estate_user';
+  is_active: boolean;
 }
 
 export interface CoAdminPermissions {
