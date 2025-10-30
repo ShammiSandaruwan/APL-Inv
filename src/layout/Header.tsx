@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({
           size="sm"
         />
       </Group>
-      <Box sx={{ flexGrow: 1, maxWidth: 400 }}>
+      <Box style={{ flexGrow: 1, maxWidth: 400 }}>
         <TextInput
           placeholder="Search for anything..."
           leftSection={<IconSearch size={16} />}

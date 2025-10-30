@@ -63,7 +63,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       throw new Error(`Profile insert failed: ${profileInsertError.message}`);
     }
 
-
     return res.status(200).json({
       id: authData.user.id,
       email: authData.user.email,
