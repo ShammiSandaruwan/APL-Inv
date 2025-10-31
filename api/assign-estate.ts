@@ -20,6 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Verify caller is super_admin
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
+      console.error('No auth header received from client');
       return res.status(401).json({ error: 'Unauthorized' });
     }
     const jwt = authHeader.split(' ')[1];
@@ -34,6 +35,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!user) {
         return res.status(401).json({ error: 'Invalid token' });
     }
+
     const { data: profile } = await supabaseAdmin
       .from('user_profiles')
       .select('role')
@@ -42,6 +44,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (profile?.role !== 'super_admin') {
       return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    // Prevent estate_user from getting multiple estates
+    const { data: targetUserProfile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('role')
+      .eq('id', target_user_id)
+      .single();
+
+    if (targetUserProfile?.role === 'estate_user') {
+      const { count } = await supabaseAdmin
+        .from('user_estates')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', target_user_id);
+
+      if ((count ?? 0) >= 1) {
+        return res.status(400).json({ error: 'Estate users can only be assigned to one estate.' });
+      }
     }
 
     // Insert mapping
