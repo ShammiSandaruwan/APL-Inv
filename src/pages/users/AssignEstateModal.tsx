@@ -1,7 +1,6 @@
 // src/pages/users/AssignEstateModal.tsx
 import { Button, Modal, Select, Stack, Text } from '@mantine/core';
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabaseClient';
 import type { Estate, UserProfile } from '../../types';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
@@ -20,7 +19,6 @@ const AssignEstateModal: React.FC<AssignEstateModalProps> = ({
   const [estates, setEstates] = useState<Estate[]>([]);
   const [selectedEstate, setSelectedEstate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { session } = useAuth();
 
   useEffect(() => {
     if (isOpen) {
@@ -38,15 +36,22 @@ const AssignEstateModal: React.FC<AssignEstateModalProps> = ({
   }, [isOpen]);
 
   const handleSubmit = async () => {
-    if (!user || !selectedEstate || !session) return;
+    if (!user || !selectedEstate) return;
 
     setIsLoading(true);
     try {
+      const session = await supabase.auth.getSession();
+      const accessToken = session.data.session?.access_token;
+
+      if (!accessToken) {
+        throw new Error("You must be logged in to perform this action.");
+      }
+
       const response = await fetch('/api/assign-estate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           target_user_id: user.id,
